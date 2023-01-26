@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 
 public class buttonLogic : MonoBehaviour
 {
@@ -18,7 +17,7 @@ public class buttonLogic : MonoBehaviour
     }
 
     void buttons() 
-    {// this must be running for as long as the button needs to function
+    { // must be in update
         if (buttonDown)
         { // button held
             if (waitedFor >= waitFor && !repeatLock)
@@ -41,7 +40,7 @@ public class buttonLogic : MonoBehaviour
             }
             else
             { // idle / not held
-              // repeats while the player is idle
+                // repeats while the player is idle
                 repeatLock = false;
                 waitedFor = 0f;
                 // CODE HERE
