@@ -7,6 +7,7 @@ public class buttonLogicExample : MonoBehaviour
 
     // this contains an example use of this which slowly changes a text color from pink to red as the button is held, 
     // then changes to green when it has been held for the given time
+    // replace any "buttonText.color" lines with your code
 
     // add the Event Trigger Component to your button
     // add two EventTypes, PointerDown and PointerUp
