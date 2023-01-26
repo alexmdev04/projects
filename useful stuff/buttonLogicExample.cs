@@ -16,7 +16,7 @@ public class buttonLogicExample : MonoBehaviour
     // make sure thet PointerUp is unchecked
 
     public static bool buttonDown { get; set; }
-    private TextMeshProUGUI buttonText;
+    [SerializeField] private TextMeshProUGUI buttonText;
     private float waitFor = 2f; // this is how long the button must be held for in seconds
     private float waitedFor = 0f;
     private bool repeatLock;
