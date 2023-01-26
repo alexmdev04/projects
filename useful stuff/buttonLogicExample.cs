@@ -1,10 +1,10 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using System;
 
 public class buttonLogicExample : MonoBehaviour
 {
+    // A simple set of logic for doing different actions on tapping, holding and letting go of a unity button,
+
     // this contains an example use of this which slowly changes a text color from pink to red as the button is held, 
     // then changes to green when it has been held for the given time
 
@@ -21,12 +21,12 @@ public class buttonLogicExample : MonoBehaviour
     private float waitedFor = 0f;
     private bool repeatLock;
 
-    private void Update()
+    void Update()
     {
         buttons();
     }
 
-    public void buttons() 
+    void buttons() 
     {// this must be running for as long as the button needs to function
         if (buttonDown)
         { // button held
@@ -45,7 +45,6 @@ public class buttonLogicExample : MonoBehaviour
         { // let go of button
             if (waitedFor > 0 && waitedFor < 0.5f)
             { // held for less than 0.5s a.k.a. a tap
-
                 waitedFor = 0;
                 buttonText.color = new(1, 0, 1);
             }
