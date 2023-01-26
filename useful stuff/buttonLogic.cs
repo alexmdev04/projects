@@ -7,7 +7,7 @@ public class buttonLogic : MonoBehaviour
     // PointerDown sets true, PointerUp sets to false
 
     public static bool buttonDown { get; set; }
-    private float waitFor = 2f;
+    private float waitFor = 2f; // button hold time
     private float waitedFor = 0f;
     private bool repeatLock;
 
