@@ -13,19 +13,21 @@ public class Weapon : MonoBehaviour
         weaponAnimation { get; private set; }
     public WeaponData.weaponList
         weapon { get; private set; }
-    public string 
-        weaponName { get; private set; }
+    public string weaponNameInternal { get; private set; }
+    public string weaponNameExternal { get; private set; }
     public WeaponData.weaponTypes
         weaponType { get; private set; }
     public Player.weaponSlots
         weaponSlot { get; private set; }
+    public float
+        weaponRecoverySpeed = 5f;
     WeaponData.weaponFireTypes
         weaponFireType;
     [SerializeField] Vector3
         weaponOriginPosition,
         weaponOriginRotation;
-    [SerializeField] List<AnimationClip>
-        weaponAnims; // place all animations here to be set to legacy
+    //[SerializeField] List<AnimationClip>
+    //    weaponAnims; // place all animations here to be set to legacy - or set rig to legacy
     [SerializeField] AudioSource
         weaponEquipSound,
         weaponShootSound;
@@ -62,6 +64,10 @@ public class Weapon : MonoBehaviour
     GameObject
         weaponModel;
 
+    float
+        weaponFireRateElasped;
+    bool
+        weaponShootHeld;
     void Awake()
     {
         //foreach (AnimationClip anim in weaponAnims) { anim.legacy = true; }
@@ -88,15 +94,84 @@ public class Weapon : MonoBehaviour
             //weaponAnimate(weaponOriginAnim);
             PlayerArms.instance.playerArmsAnimate(weaponOriginAnim, weapon);
         }
+        if (weaponFireRateElasped > 0) { weaponFireRateElasped -= Time.deltaTime; }
+    }
+    void LateUpdate()
+    {
+        if (weaponFireType == WeaponData.weaponFireTypes.semiAuto || 
+            weaponFireType == WeaponData.weaponFireTypes.burst ||
+            weaponFireType == WeaponData.weaponFireTypes.boltAction) 
+            weaponShootHeld = Player.instance.input.Player.Shoot.IsPressed();
     }
     public void weaponShoot()
     {
         if (weaponEquipped && weaponEquipFinished)
         {
-            weaponSound(weaponShootSound, "weaponShootSound");
-            PlayerArms.instance.playerArmsAnimate(weaponShootAnim, weapon);
+            switch (weaponFireType)
+            {
+                case WeaponData.weaponFireTypes.semiAuto:
+                    {
+                        if (weaponFireRateElasped > 0)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            if (weaponShootHeld)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                weaponShootPassed();
+                                weaponFireRateElasped = weaponFireRate;
+                                break;
+                            }
+                        }
+                    }
+                case WeaponData.weaponFireTypes.fullAuto:
+                    {
+                        if (weaponFireRateElasped > 0)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            weaponShootPassed();
+                            weaponFireRateElasped = weaponFireRate;
+                            break;
+                        }
+                    }
+                case WeaponData.weaponFireTypes.burst:
+                    {
+                        break;
+                    }
+                case WeaponData.weaponFireTypes.boltAction:
+                    {
+                        break;
+                    }
+                case WeaponData.weaponFireTypes.melee:
+                    {
+                        break;
+                    }
+                case WeaponData.weaponFireTypes.equipment:
+                    {
+                        break;
+                    }
+            }
+            {
+
+            }
+
             //weaponAnimate(weaponShootAnim);
         }
+    }
+    void weaponShootPassed()
+    {
+        weaponFireRateElasped = 0f;
+        weaponSound(weaponShootSound, "weaponShootSound");
+        PlayerArms.instance.playerArmsAnimate(weaponShootAnim, weapon);
+        PlayerArms.instance.playerArmsPNShootRecoil();
     }
     public void weaponReload()
     {
@@ -123,6 +198,9 @@ public class Weapon : MonoBehaviour
     public void weaponUnequip()
     {
         weaponEquipped = false;
+        weaponEquipFinished = false;
+        weaponFireRateElasped = 0f;
+        
     }
 
     #region weaponSway
@@ -208,6 +286,7 @@ public class Weapon : MonoBehaviour
     public void setWeapon
         (
         WeaponData.weaponList _weapon,
+        string nameExternal,
         int variant,
         WeaponData.weaponTypes type,
         Player.weaponSlots slot,
@@ -219,16 +298,20 @@ public class Weapon : MonoBehaviour
         float equipTime,
         float aimTime,
         float reloadTime,
+        float recoverySpeed,
         float weight = 50f,
-        int burstAmount = 0)
+        int burstAmount = 0
+        )
     {
         weapon = _weapon;
-        name = weapon.ToString();
+        weaponNameInternal = weapon.ToString();
+        weaponNameExternal = nameExternal;
+        gameObject.name = weaponNameInternal;
         weaponVariant = variant;
-        weaponEquipAnim = "Hands|" + weapon.ToString() + "_Equip";
-        weaponShootAnim = "Hands|" + weapon.ToString() + "_Shoot";
-        weaponReloadAnim = "Hands|" + weapon.ToString() + "_Reload";
-        weaponOriginAnim = "Hands|" + weapon.ToString() + "_0";
+        weaponEquipAnim = "Hands|" + weaponNameInternal + "_Equip";
+        weaponShootAnim = "Hands|" + weaponNameInternal + "_Shoot";
+        weaponReloadAnim = "Hands|" + weaponNameInternal + "_Reload";
+        weaponOriginAnim = "Hands|" + weaponNameInternal + "_0";
         weaponType = type;
         weaponSlot = slot;
         weaponFireType = fireType;
@@ -239,6 +322,7 @@ public class Weapon : MonoBehaviour
         weaponEquipTime = equipTime;
         weaponAimTime = aimTime;
         weaponReloadTime = reloadTime;
+        weaponRecoverySpeed = recoverySpeed;
         weaponWeight = weight;
         weaponBurstAmount = burstAmount;
     }
@@ -249,13 +333,13 @@ public class Weapon : MonoBehaviour
     }
     public void addWeaponAudio(AudioSource audioSource, AudioClip audioClip)
     {
-        if (audioClip.name == weapon.ToString() + "_Shoot_Sound")
+        if (audioClip.name == weaponNameInternal + "_Shoot_Sound")
         {
             weaponShootSound = audioSource;
             weaponShootSound.clip = audioClip;
             weaponShootSound.playOnAwake = false;
         }
-        else if (audioClip.name == weapon.ToString() + "_Equip_Sound")
+        else if (audioClip.name == weaponNameInternal + "_Equip_Sound")
         {
             weaponEquipSound = audioSource;
             weaponEquipSound.clip = audioClip;
@@ -263,7 +347,7 @@ public class Weapon : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Unknown sound added to " + weapon.ToString() + ", " + audioClip.name);
+            Debug.LogError("Unknown sound added to " + weaponNameInternal + ", " + audioClip.name);
         }
     }
     public void setWeaponAnimations(
@@ -292,24 +376,13 @@ public class Weapon : MonoBehaviour
         sb.Append("camo: ").Append(weaponCamo).Append("\n");
         sb.Append("damage: ").Append(weaponDamage).Append(" x ").Append(weaponDamageMultiplier).Append(" = ").Append(weaponDamage * weaponDamageMultiplier).Append("\n");
         sb.Append("fireRate: ").Append(weaponFireRate).Append(" x ").Append(weaponFireRateMultiplier).Append(" = ").Append(weaponFireRate * weaponFireRateMultiplier).Append("\n");
+        sb.Append("fireRateElapsed: ").Append(weaponFireRateElasped).Append("\n");
         sb.Append("equipTime: ").Append(weaponEquipTime).Append("s x ").Append(weaponEquipTimeMultiplier).Append(" = ").Append(weaponEquipTime * weaponEquipTimeMultiplier).Append("\n");
         sb.Append("aimTime: ").Append(weaponAimTime).Append("s x ").Append(weaponAimTimeMultiplier).Append(" = ").Append(weaponAimTime * weaponAimTimeMultiplier).Append("\n");
         sb.Append("reloadTime: ").Append(weaponReloadTime).Append("s x ").Append(weaponReloadTimeMultiplier).Append(" = ").Append(weaponReloadTime * weaponReloadTimeMultiplier).Append("\n");
+        //sb.Append("recoverySpeed: ").Append(weaponRecoverySpeed).Append("\n");
         sb.Append("weight: ").Append(weaponWeight);
         return sb;
-        //return
-        //    "name: " + weapon.ToString() + "\n" +
-        //    "type: " + weaponType.ToString() + "\n" +
-        //    "originPosition: " + weaponOriginPosition.ToString() + "\n" +
-        //    "originRotation: " + weaponOriginRotation.ToString() + "\n" +
-        //    "variant: " + weaponVariant + "\n" +
-        //    "camo: " + weaponCamo + "\n" +
-        //    "damage: " + weaponDamage + " x " + weaponDamageMultiplier + " = " + (weaponDamage * weaponDamageMultiplier) + "\n" +
-        //    "fireRate: " + weaponFireRate + " x " + weaponFireRateMultiplier + " = " + (weaponFireRate * weaponFireRateMultiplier) + "\n" +
-        //    "equipTime: " + weaponEquipTime + " x " + weaponEquipTimeMultiplier + " = " + (weaponEquipTime * weaponEquipTimeMultiplier) + "\n" +
-        //    "aimTime: " + weaponAimTime + " x " + weaponAimTimeMultiplier + " = " + (weaponAimTime * weaponAimTimeMultiplier) + "\n" +
-        //    "reloadTime: " + weaponReloadTime + " x " + weaponReloadTimeMultiplier + " = " + (weaponReloadTime * weaponReloadTimeMultiplier) + "\n" +
-        //    "weight: " + weaponWeight;
     }
     void weaponSound(AudioSource sound, string soundNameDebug = "sound")
     {
@@ -323,7 +396,7 @@ public class Weapon : MonoBehaviour
         }
         catch (NullReferenceException)
         {
-            Debug.LogError(weapon.ToString() + " failed to play " + soundNameDebug + ", missing sound!");
+            Debug.LogError(weaponNameInternal + " failed to play " + soundNameDebug + ", missing sound!");
         }
     }
     void weaponAnimate(string animation)

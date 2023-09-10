@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Crosshair : MonoBehaviour
+public class uiCrosshair : MonoBehaviour
 { 
 
     [SerializeField] GameObject

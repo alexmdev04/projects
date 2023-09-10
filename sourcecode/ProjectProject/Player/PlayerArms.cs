@@ -1,89 +1,36 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class PlayerArms : MonoBehaviour
 {
     public static PlayerArms 
         instance { get; private set; }
+    public PlayerArmsDrift playerArmsDrift { get; private set; }
     public Animation 
         playerArmsAnimation { get; private set; }
-    [SerializeField] Vector3 
-        playerArmsDriftPositionScale = new(0.01f, 0.01f, 0.01f);
-    [SerializeField] Vector2
-        playerArmsLookSwayValue;
-    [SerializeField] float
-        playerArmsDriftPositionLerp = 10,
-        playerArmsDriftSpeedToIdle = 20f,
-        playerArmsDriftSpeedToWalking = 5f,
-        playerArmsIdleSwaySpeedMultiplier = 1f,
-        playerArmsIdleSwayDistanceMultiplier = 1f;        
-    float
-        playerArmsDriftPositionX = 0,
-        playerArmsDriftPositionY = 0,
-        playerArmsDriftPositionZ = 0,
-        gameClock;
+    public  Vector2 playerArmsLookSwayValue { get; private set; }
+    public float gameClock;
+    public Vector3 pnVector { get; private set; }
+    [SerializeField] Vector3 pnScale = Vector3.one;
     void Awake()
     {
         instance = this;
         playerArmsAnimation = GetComponent<Animation>();
+        playerArmsAnimation.wrapMode = WrapMode.Clamp;
+        playerArmsDrift = GetComponent<PlayerArmsDrift>();
     }
     void Start()
     {
 
     }
-
     void Update()
     {
         gameClock += Time.deltaTime;
-        playerArmsDrift(Player.instance.movementDirection);
-        playerArmsLookSway();
-    }
-    void playerArmsDrift(Vector3 driftPosition)
-    {
-        float
-            driftSpeed,
-            driftPositionYTarget = 0,
-            driftPositionZTarget = 0;
-
-        if (driftPosition != Vector3.zero)
-        {
-            // set y and z
-            if (driftPosition.z > 0) // only forward
-            {
-                driftPositionYTarget = -2;
-                driftPositionZTarget = -2;
-            }
-            else if (driftPosition.z < 0) // only backward
-            {
-                driftPositionYTarget = -1;
-                driftPositionZTarget = 1;
-            }
-            if (driftPosition.x != 0)
-            {
-                driftPositionYTarget = (driftPosition.z < 0) ? -1 : -2; // sideways and backward
-                driftPositionZTarget = (driftPosition.z < 0) ? 1 : -2; //  sideways or forward
-            }
-            playerArmsDriftPositionX = Mathf.Lerp(playerArmsDriftPositionX, driftPosition.x, Time.deltaTime * playerArmsDriftPositionLerp);
-            playerArmsDriftPositionY = Mathf.Lerp(playerArmsDriftPositionY, driftPositionYTarget, Time.deltaTime * playerArmsDriftPositionLerp);
-            playerArmsDriftPositionZ = Mathf.Lerp(playerArmsDriftPositionZ, driftPositionZTarget, Time.deltaTime * playerArmsDriftPositionLerp);
-            driftPosition = new(
-                playerArmsDriftPositionX,
-                playerArmsDriftPositionY,
-                playerArmsDriftPositionZ);
-            driftSpeed = playerArmsDriftSpeedToWalking;
-        }
-        else
-        {
-            playerArmsDriftPositionX = 0;
-            playerArmsDriftPositionY = 0;
-            playerArmsDriftPositionZ = 0;
-            driftSpeed = playerArmsDriftSpeedToIdle;
-        }
-        Vector3 driftPositionScaled = Vector3.Scale(driftPosition, playerArmsDriftPositionScale);
-        Vector3 playerArmsIdleSway = new(Mathf.Cos(gameClock * playerArmsIdleSwaySpeedMultiplier), Mathf.Sin(gameClock * playerArmsIdleSwaySpeedMultiplier), 0f);
-        driftPositionScaled += playerArmsIdleSway * playerArmsIdleSwayDistanceMultiplier;
-        gameObject.transform.localPosition = Vector3.Lerp(gameObject.transform.localPosition, driftPositionScaled, Time.deltaTime * driftSpeed);
+        playerArmsDrift.driftkb(Player.instance.movementDirection);
+        pnVector = Vector3.Lerp(pnVector, Vector3.zero, Time.deltaTime * Player.instance.weaponRecoverySpeed);
     }
     public void playerArmsAnimate(string animation, WeaponData.weaponList weapon = WeaponData.weaponList.defaultWeapon)
     {
@@ -91,8 +38,18 @@ public class PlayerArms : MonoBehaviour
         if (weapon != WeaponData.weaponList.defaultWeapon) { playerArmsAnimation.Play("Hands|" + weapon.ToString() + "_0"); }
         playerArmsAnimation.Play(animation);
     }
-    void playerArmsLookSway()
+    public void playerArmsPNShootRecoil()
     {
-        playerArmsLookSwayValue = Player.instance.input.Player.Look.ReadValue<Vector2>();
+        float random1 = UnityEngine.Random.Range(0f, 100f);
+        float random2 = UnityEngine.Random.Range(0f, 100f);
+        float pn1 = Mathf.PerlinNoise(random1, random2);
+        float pn2 = Mathf.PerlinNoise(random2, random1);
+        float pnPosNeg1 = UnityEngine.Random.Range(0f, 1f);
+        float pnPosNeg2 = UnityEngine.Random.Range(0f, 1f);
+        float pnPosNegOutput1 = (pnPosNeg1 > 0.5f) ? -1 : 1;
+        float pnPosNegOutput2 = (pnPosNeg2 > 0.5f) ? -1 : 1;
+        pnVector = Vector3.Scale(new Vector3(pn1 * pnPosNegOutput1, pn2 * pnPosNegOutput2, 0), pnScale);
+        transform.localEulerAngles += pnVector;
+        //Debug.Log(pnVector);
     }
 }

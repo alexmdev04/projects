@@ -14,7 +14,7 @@ public class WeaponData : MonoBehaviour
         newWeaponObj,
         newWeaponModel;
     Transform newWeaponParent;
-    string newWeaponFileName;
+    string newWeaponNameInternal;
     AnimationClip
         originAnim,
         equipAnim,
@@ -32,7 +32,8 @@ public class WeaponData : MonoBehaviour
         defaultWeapon,
         fists,
         knife,
-        desertEagle
+        desertEagle,
+        akm
     }
     public enum weaponTypes
     {
@@ -59,9 +60,9 @@ public class WeaponData : MonoBehaviour
     }
     public Weapon createWeapon(weaponList weapon, int variant = 0)
     {
-        newWeaponFileName = weapon.ToString();
-        Debug.Log("newWeapon, " + newWeaponFileName + " variant=" + variant);
-
+        newWeaponNameInternal = weapon.ToString();
+        Debug.Log("newWeapon, " + newWeaponNameInternal + " variant=" + variant);
+        string nameExternal = "defaultWeapon";
         weaponTypes type = weaponTypes.melee;
         Player.weaponSlots slot = Player.weaponSlots.weaponMelee;
         weaponFireTypes fireType = weaponFireTypes.melee;
@@ -73,8 +74,8 @@ public class WeaponData : MonoBehaviour
             fireRate = 0f,
             equipTime = 0f,
             aimTime = 0f,
-            reloadTime = 0f;
-
+            reloadTime = 0f,
+            recoverySpeed = 5f;
 
         switch (weapon)
         {
@@ -88,22 +89,26 @@ public class WeaponData : MonoBehaviour
                     equipTime = 1f;
                     aimTime = 0.25f;
                     reloadTime = 1f;
+                    recoverySpeed = 10f;
                     switch (variant)
                     {
                         case 1:
                             {
+                                nameExternal = "Default Primary Weapon";
                                 slot = Player.weaponSlots.weaponPrimary;
                                 fireType = weaponFireTypes.fullAuto;
                                 break;
                             }
                         case 2:
                             {
+                                nameExternal = "Default Secondary Weapon";
                                 slot = Player.weaponSlots.weaponSecondary;
                                 fireType = weaponFireTypes.semiAuto;
                                 break;
                             }
                         case 3:
                             {
+                                nameExternal = "Default Melee Weapon";
                                 type = weaponTypes.melee;
                                 slot = Player.weaponSlots.weaponMelee;
                                 fireType = weaponFireTypes.melee;
@@ -111,6 +116,7 @@ public class WeaponData : MonoBehaviour
                             }
                         case 4:
                             {
+                                nameExternal = "Default Equipment";
                                 type = weaponTypes.equipment;
                                 slot = Player.weaponSlots.weaponEquipment1;
                                 fireType = weaponFireTypes.equipment;
@@ -118,6 +124,7 @@ public class WeaponData : MonoBehaviour
                             }
                         default:
                             {
+                                nameExternal = "Default Weapon";
                                 slot = Player.weaponSlots.weaponPrimary;
                                 fireType = weaponFireTypes.fullAuto;
                                 break;
@@ -127,25 +134,44 @@ public class WeaponData : MonoBehaviour
                 }
             case weaponList.desertEagle:
                 {
+                    nameExternal = "Desert Eagle";
                     type = weaponTypes.gun;
                     slot = Player.weaponSlots.weaponSecondary;
                     fireType = weaponFireTypes.semiAuto;
                     originPosition = new Vector3(0.1425832f, 0.10636367f, 0.6310548f);
                     originRotation = new Vector3(0f, -180f, 0f);
                     damage = 65;
-                    fireRate = 0.5f;
+                    fireRate = 0.35f;
                     equipTime = 1f;
                     aimTime = 0.3f;
                     reloadTime = 1f;
+                    recoverySpeed = 5f;
+                    break;
+                }
+            case weaponList.akm:
+                {
+                    nameExternal = "AKM";
+                    type = weaponTypes.gun;
+                    slot = Player.weaponSlots.weaponPrimary;
+                    fireType = weaponFireTypes.fullAuto;
+                    originPosition = new Vector3(0.1425832f, 0.10636367f, 0.6310548f);
+                    originRotation = new Vector3(0f, -180f, 0f);
+                    damage = 65;
+                    fireRate = 0.1f;
+                    equipTime = 1f;
+                    aimTime = 0.3f;
+                    reloadTime = 1f;
+                    recoverySpeed = 7.5f;
                     break;
                 }
             case weaponList.fists:
                 {
-
+                    nameExternal = "Fists";
                     break;
                 }
             case weaponList.knife:
                 {
+                    nameExternal = "Knife";
                     type = weaponTypes.melee;
                     slot = Player.weaponSlots.weaponMelee;
                     fireType = weaponFireTypes.melee;
@@ -156,19 +182,20 @@ public class WeaponData : MonoBehaviour
                     equipTime = 1f;
                     aimTime = 0f;
                     reloadTime = 0f;
+                    recoverySpeed = 100f;
                     break;
                 }
             default:
                 {
-                    Debug.LogError("Weapon " + newWeaponFileName + " not found!");
+                    Debug.LogError("Weapon " + newWeaponNameInternal + " not found!");
                     return null;
                 }
         }
         // find transform for creating new model
-        newWeaponParent = PlayerArms.instance.gameObject.transform.Find("Hands").Find(newWeaponFileName + "_Weapon");
+        newWeaponParent = PlayerArms.instance.gameObject.transform.Find("Hands").Find("weaponBone");
         if (newWeaponParent == null)
         {
-            Debug.LogError("No transform found! (playerArms/Hands/" + newWeaponFileName + "_Weapon)");
+            Debug.LogError("No transform found! (playerArms/Hands/" + newWeaponNameInternal + "_Weapon)");
             newWeaponParent = PlayerArms.instance.gameObject.transform.Find("Hands");
         }
         
@@ -182,12 +209,12 @@ public class WeaponData : MonoBehaviour
         // creates weapon component and sets its data
         newWeapon = null;
         newWeapon = newWeaponObj.AddComponent<Weapon>();
-        newWeapon.setWeapon(weapon, variant, type, slot, fireType, originPosition, originRotation, damage, fireRate, equipTime, aimTime, reloadTime);
+        newWeapon.setWeapon(weapon, nameExternal, variant, type, slot, fireType, originPosition, originRotation, damage, fireRate, equipTime, aimTime, reloadTime, recoverySpeed);
         Player.instance.weaponsHeld.Add(newWeapon);
 
         // adding weapon model
         newWeaponModel = null;
-        loadWeaponModel("Assets/Models/weaponModels/" + newWeaponFileName + ".fbx", newWeaponObj.transform);
+        loadWeaponModel("Assets/Models/weaponModels/" + newWeaponNameInternal + ".fbx", newWeaponObj.transform);
 
         // adding weapon animations
         originAnim = null;
@@ -216,9 +243,11 @@ public class WeaponData : MonoBehaviour
             Debug.LogError("No weapon model found for " + path + ", creating weaponDefault");
             newWeapon.setWeaponModel(newWeaponModel);
             newWeaponModel.layer = 3;
-            newWeaponModel.name = newWeaponFileName;
+            newWeaponModel.transform.SetChildLayers(3);
+            newWeaponModel.name = newWeaponNameInternal;
         }
     }
+
     void loadWeaponModelCompleted(AsyncOperationHandle<GameObject> weaponModel, Transform parentObj)
     {
         if (weaponModel.Status == AsyncOperationStatus.Succeeded)
@@ -227,8 +256,9 @@ public class WeaponData : MonoBehaviour
             Destroy(newWeaponObj.transform.Find("weaponDefault").gameObject);
             newWeapon.setWeaponModel(newWeaponModel);
             newWeaponModel.layer = 3;
-            newWeaponModel.GetComponentInChildren<MeshRenderer>().gameObject.layer = 3;
-            newWeaponModel.name = newWeaponFileName;
+            newWeaponModel.transform.SetChildLayers(3);
+            //newWeaponModel.GetComponentInChildren<MeshRenderer>().gameObject.layer = 3;
+            newWeaponModel.name = newWeaponNameInternal;
         }
         else
         {
@@ -273,21 +303,21 @@ public class WeaponData : MonoBehaviour
     {
         try
         {
-            AsyncOperationHandle<AudioClip> shootSound = Addressables.LoadAssetAsync<AudioClip>("Assets/Sounds/" + newWeaponFileName + "_Shoot_Sound.wav");
+            AsyncOperationHandle<AudioClip> shootSound = Addressables.LoadAssetAsync<AudioClip>("Assets/Sounds/" + newWeaponNameInternal + "_Shoot_Sound.wav");
             shootSound.Completed += delegate { loadWeaponSoundCompleted(shootSound); };
         }
         catch (InvalidKeyException)
         {
-            Debug.LogError(newWeaponFileName + "_Shoot_Sound not found!");
+            Debug.LogError(newWeaponNameInternal + "_Shoot_Sound not found!");
         }
         try
         {
-            AsyncOperationHandle<AudioClip> equipSound = Addressables.LoadAssetAsync<AudioClip>("Assets/Sounds/" + newWeaponFileName + "_Equip_Sound.wav");
+            AsyncOperationHandle<AudioClip> equipSound = Addressables.LoadAssetAsync<AudioClip>("Assets/Sounds/" + newWeaponNameInternal + "_Equip_Sound.wav");
             equipSound.Completed += delegate { loadWeaponSoundCompleted(equipSound); };
         }
         catch (InvalidKeyException)
         {
-            Debug.LogError(newWeaponFileName + "_Equip_Sound not found!");
+            Debug.LogError(newWeaponNameInternal + "_Equip_Sound not found!");
         }
     }
     void loadWeaponSoundCompleted(AsyncOperationHandle<AudioClip> sound)

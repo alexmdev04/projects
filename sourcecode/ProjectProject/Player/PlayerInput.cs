@@ -55,7 +55,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""WeaponSlot1"",
+                    ""name"": ""weaponPrimary"",
                     ""type"": ""Button"",
                     ""id"": ""f932e87c-a73d-4d00-9b84-1c495d850262"",
                     ""expectedControlType"": ""Button"",
@@ -64,7 +64,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""WeaponSlot2"",
+                    ""name"": ""weaponSecondary"",
                     ""type"": ""Button"",
                     ""id"": ""5f540b5e-dbed-4077-a73e-0f2973233998"",
                     ""expectedControlType"": ""Button"",
@@ -73,7 +73,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""MeleeWeaponSlot"",
+                    ""name"": ""weaponMelee"",
                     ""type"": ""Button"",
                     ""id"": ""37a1fb60-5848-48a7-bb2c-a36fe74cbc78"",
                     ""expectedControlType"": ""Button"",
@@ -82,7 +82,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""EquipmentSlot1"",
+                    ""name"": ""weaponEquipment1"",
                     ""type"": ""Button"",
                     ""id"": ""9aa3eab9-1bfe-4834-8839-22368e6101be"",
                     ""expectedControlType"": ""Button"",
@@ -247,7 +247,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""WeaponSlot1"",
+                    ""action"": ""weaponPrimary"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -258,7 +258,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""WeaponSlot2"",
+                    ""action"": ""weaponSecondary"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -269,7 +269,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""EquipmentSlot1"",
+                    ""action"": ""weaponEquipment1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -280,7 +280,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""MeleeWeaponSlot"",
+                    ""action"": ""weaponMelee"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -344,10 +344,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
-        m_Player_WeaponSlot1 = m_Player.FindAction("WeaponSlot1", throwIfNotFound: true);
-        m_Player_WeaponSlot2 = m_Player.FindAction("WeaponSlot2", throwIfNotFound: true);
-        m_Player_MeleeWeaponSlot = m_Player.FindAction("MeleeWeaponSlot", throwIfNotFound: true);
-        m_Player_EquipmentSlot1 = m_Player.FindAction("EquipmentSlot1", throwIfNotFound: true);
+        m_Player_weaponPrimary = m_Player.FindAction("weaponPrimary", throwIfNotFound: true);
+        m_Player_weaponSecondary = m_Player.FindAction("weaponSecondary", throwIfNotFound: true);
+        m_Player_weaponMelee = m_Player.FindAction("weaponMelee", throwIfNotFound: true);
+        m_Player_weaponEquipment1 = m_Player.FindAction("weaponEquipment1", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_WeaponSlotUp = m_Player.FindAction("WeaponSlotUp", throwIfNotFound: true);
         m_Player_WeaponSlotDown = m_Player.FindAction("WeaponSlotDown", throwIfNotFound: true);
@@ -415,10 +415,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Shoot;
-    private readonly InputAction m_Player_WeaponSlot1;
-    private readonly InputAction m_Player_WeaponSlot2;
-    private readonly InputAction m_Player_MeleeWeaponSlot;
-    private readonly InputAction m_Player_EquipmentSlot1;
+    private readonly InputAction m_Player_weaponPrimary;
+    private readonly InputAction m_Player_weaponSecondary;
+    private readonly InputAction m_Player_weaponMelee;
+    private readonly InputAction m_Player_weaponEquipment1;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_WeaponSlotUp;
     private readonly InputAction m_Player_WeaponSlotDown;
@@ -429,10 +429,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
-        public InputAction @WeaponSlot1 => m_Wrapper.m_Player_WeaponSlot1;
-        public InputAction @WeaponSlot2 => m_Wrapper.m_Player_WeaponSlot2;
-        public InputAction @MeleeWeaponSlot => m_Wrapper.m_Player_MeleeWeaponSlot;
-        public InputAction @EquipmentSlot1 => m_Wrapper.m_Player_EquipmentSlot1;
+        public InputAction @weaponPrimary => m_Wrapper.m_Player_weaponPrimary;
+        public InputAction @weaponSecondary => m_Wrapper.m_Player_weaponSecondary;
+        public InputAction @weaponMelee => m_Wrapper.m_Player_weaponMelee;
+        public InputAction @weaponEquipment1 => m_Wrapper.m_Player_weaponEquipment1;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @WeaponSlotUp => m_Wrapper.m_Player_WeaponSlotUp;
         public InputAction @WeaponSlotDown => m_Wrapper.m_Player_WeaponSlotDown;
@@ -454,18 +454,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Shoot.started += instance.OnShoot;
             @Shoot.performed += instance.OnShoot;
             @Shoot.canceled += instance.OnShoot;
-            @WeaponSlot1.started += instance.OnWeaponSlot1;
-            @WeaponSlot1.performed += instance.OnWeaponSlot1;
-            @WeaponSlot1.canceled += instance.OnWeaponSlot1;
-            @WeaponSlot2.started += instance.OnWeaponSlot2;
-            @WeaponSlot2.performed += instance.OnWeaponSlot2;
-            @WeaponSlot2.canceled += instance.OnWeaponSlot2;
-            @MeleeWeaponSlot.started += instance.OnMeleeWeaponSlot;
-            @MeleeWeaponSlot.performed += instance.OnMeleeWeaponSlot;
-            @MeleeWeaponSlot.canceled += instance.OnMeleeWeaponSlot;
-            @EquipmentSlot1.started += instance.OnEquipmentSlot1;
-            @EquipmentSlot1.performed += instance.OnEquipmentSlot1;
-            @EquipmentSlot1.canceled += instance.OnEquipmentSlot1;
+            @weaponPrimary.started += instance.OnWeaponPrimary;
+            @weaponPrimary.performed += instance.OnWeaponPrimary;
+            @weaponPrimary.canceled += instance.OnWeaponPrimary;
+            @weaponSecondary.started += instance.OnWeaponSecondary;
+            @weaponSecondary.performed += instance.OnWeaponSecondary;
+            @weaponSecondary.canceled += instance.OnWeaponSecondary;
+            @weaponMelee.started += instance.OnWeaponMelee;
+            @weaponMelee.performed += instance.OnWeaponMelee;
+            @weaponMelee.canceled += instance.OnWeaponMelee;
+            @weaponEquipment1.started += instance.OnWeaponEquipment1;
+            @weaponEquipment1.performed += instance.OnWeaponEquipment1;
+            @weaponEquipment1.canceled += instance.OnWeaponEquipment1;
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
@@ -488,18 +488,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Shoot.started -= instance.OnShoot;
             @Shoot.performed -= instance.OnShoot;
             @Shoot.canceled -= instance.OnShoot;
-            @WeaponSlot1.started -= instance.OnWeaponSlot1;
-            @WeaponSlot1.performed -= instance.OnWeaponSlot1;
-            @WeaponSlot1.canceled -= instance.OnWeaponSlot1;
-            @WeaponSlot2.started -= instance.OnWeaponSlot2;
-            @WeaponSlot2.performed -= instance.OnWeaponSlot2;
-            @WeaponSlot2.canceled -= instance.OnWeaponSlot2;
-            @MeleeWeaponSlot.started -= instance.OnMeleeWeaponSlot;
-            @MeleeWeaponSlot.performed -= instance.OnMeleeWeaponSlot;
-            @MeleeWeaponSlot.canceled -= instance.OnMeleeWeaponSlot;
-            @EquipmentSlot1.started -= instance.OnEquipmentSlot1;
-            @EquipmentSlot1.performed -= instance.OnEquipmentSlot1;
-            @EquipmentSlot1.canceled -= instance.OnEquipmentSlot1;
+            @weaponPrimary.started -= instance.OnWeaponPrimary;
+            @weaponPrimary.performed -= instance.OnWeaponPrimary;
+            @weaponPrimary.canceled -= instance.OnWeaponPrimary;
+            @weaponSecondary.started -= instance.OnWeaponSecondary;
+            @weaponSecondary.performed -= instance.OnWeaponSecondary;
+            @weaponSecondary.canceled -= instance.OnWeaponSecondary;
+            @weaponMelee.started -= instance.OnWeaponMelee;
+            @weaponMelee.performed -= instance.OnWeaponMelee;
+            @weaponMelee.canceled -= instance.OnWeaponMelee;
+            @weaponEquipment1.started -= instance.OnWeaponEquipment1;
+            @weaponEquipment1.performed -= instance.OnWeaponEquipment1;
+            @weaponEquipment1.canceled -= instance.OnWeaponEquipment1;
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
@@ -540,10 +540,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
-        void OnWeaponSlot1(InputAction.CallbackContext context);
-        void OnWeaponSlot2(InputAction.CallbackContext context);
-        void OnMeleeWeaponSlot(InputAction.CallbackContext context);
-        void OnEquipmentSlot1(InputAction.CallbackContext context);
+        void OnWeaponPrimary(InputAction.CallbackContext context);
+        void OnWeaponSecondary(InputAction.CallbackContext context);
+        void OnWeaponMelee(InputAction.CallbackContext context);
+        void OnWeaponEquipment1(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnWeaponSlotUp(InputAction.CallbackContext context);
         void OnWeaponSlotDown(InputAction.CallbackContext context);

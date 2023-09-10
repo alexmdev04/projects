@@ -14,6 +14,7 @@ public class DebugOverlay : MonoBehaviour
         uiRes,
         uiStats,
         uiWeaponStats,
+        uiPlayerArmsStats,
         uiTodo,
         uiNotes,
         uiPlayerStats;
@@ -35,11 +36,11 @@ public class DebugOverlay : MonoBehaviour
         //InvokeRepeating(nameof(getDebugNotes), 0f, 1f);
         InvokeRepeating(nameof(getFPS), 0f, 0.2f);
         StartCoroutine(getWeaponStats());
+        StartCoroutine(getPlayerArmsStats());
     }
     void Update()
     {
         getStats();
-        getWeaponStats();
         if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
     }
     void getRes()
@@ -127,6 +128,28 @@ public class DebugOverlay : MonoBehaviour
             uiWeaponStats.text = weaponDebugStats.ToString();
 
             //    string.Format("weapon;\nequippedSlot: {0}\n{1}", weaponSlot.ToString(), weaponDebugStats.ToString());
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
+    IEnumerator getPlayerArmsStats()
+    {
+        while (true)
+        {
+            StringBuilder playerArmsDebugStats = 
+                new StringBuilder()
+                .Append("<u>playerArms;</u>")
+                .Append("\ndriftPosition;")
+                .Append("\n    Input: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftPositionInput)
+                .Append("\n    Target: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftPositionTarget)
+                .Append("\n    Output: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftPositionOutput)
+                .Append("\n    Speed: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftPositionSpeed)
+                .Append("\ndriftRotation;")
+                .Append("\n    Target: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftRotationTarget)
+                .Append("\n    Output: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftRotationOutput)
+                .Append("\n    Speed: ").Append(PlayerArms.instance.playerArmsDrift.debugDriftRotationSpeed);
+
+            uiPlayerArmsStats.text = playerArmsDebugStats.ToString();
             yield return new WaitForEndOfFrame();
         }
     }
