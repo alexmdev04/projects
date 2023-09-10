@@ -40,7 +40,7 @@ public class DebugOverlay : MonoBehaviour
     }
     void Update()
     {
-        getStats();
+        //getStats();
         if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
     }
     void getRes()

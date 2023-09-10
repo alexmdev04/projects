@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 // weapon needs to wait for it to be loaded before playing sound or anims
 public class Weapon : MonoBehaviour
 {
@@ -81,14 +78,6 @@ public class Weapon : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            weaponEquip();
-        }
-        if (Input.GetKeyDown(KeyCode.Slash))
-        {
-            weaponShoot();
-        }
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //weaponAnimate(weaponOriginAnim);

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -89,7 +88,6 @@ public class Player : MonoBehaviour
     void Update()
     {
         Application.targetFrameRate = targetFramerate;
-        //playerLook();
         checkEquippedWeapon();
         movementDirection = input.Player.Move.ReadValue<Vector3>();
         if (movementDirection != Vector3.zero) { playerMove(movementAcceleration); }
