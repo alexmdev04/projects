@@ -12,12 +12,12 @@ public class DebugOverlay : MonoBehaviour
     [SerializeField] TextMeshProUGUI
         uiFPS,
         uiRes,
-        uiStats,
         uiWeaponStats,
         uiPlayerArmsStats,
         uiTodo,
         uiNotes,
-        uiPlayerStats;
+        uiPlayerStats,
+        uiVersion;
     public GameObject mainParent;
     public bool showAllNotes;
     int deviceFps;
@@ -27,6 +27,7 @@ public class DebugOverlay : MonoBehaviour
     void Awake()
     {
         instance = this;
+        uiVersion.text = "v" + Application.version;
     }
     void Start()
     {
@@ -46,7 +47,8 @@ public class DebugOverlay : MonoBehaviour
     void getRes()
     {
         var gcd = calcGCD(Screen.width, Screen.height);
-        uiRes.text = (Screen.width.ToString() + "x" + Screen.height.ToString()) + " - " + 
+        uiRes.text = Screen.width.ToString() + "x" + Screen.height.ToString() + "\n" 
+            + Screen.currentResolution.refreshRateRatio + "Hz" + "\n" +
             (string.Format("{0}:{1}", Screen.width / gcd, Screen.height / gcd));
     }
     void getFPS()
@@ -58,11 +60,6 @@ public class DebugOverlay : MonoBehaviour
     //     timePlayedCurrentStr = convertTime(gameHandler.instance.timePlayedSec);
     //     timePlayedSavedStr = convertTime(fileHandler.timePlayedSec);
     // }
-    void getStats()
-    {
-        uiStats.text
-            = "stats;";
-    }
     void getDebugNotes()
     {
         List<DebugNote> notes = mainParent.GetComponentsInChildren<DebugNote>().ToList();
@@ -84,51 +81,51 @@ public class DebugOverlay : MonoBehaviour
         {
             StringBuilder weaponDebugStatsGet;
             Player.weaponSlots weaponSlot = Player.instance.weaponSlotEquipped;
-            switch (weaponSlot)
-            {
-                case Player.weaponSlots.weaponPrimary:
-                    {
-                        weaponDebugStatsGet = Player.instance.weaponPrimary.getWeaponDebugStats();
-                        break;
-                    }
-                case Player.weaponSlots.weaponSecondary:
-                    {
-                        weaponDebugStatsGet = Player.instance.weaponSecondary.getWeaponDebugStats();
-                        break;
-                    }
-                case Player.weaponSlots.weaponMelee:
-                    {
-                        weaponDebugStatsGet = Player.instance.weaponMelee.getWeaponDebugStats();
-                        break;
-                    }
-                case Player.weaponSlots.weaponEquipment1:
-                    {
-                        weaponDebugStatsGet = Player.instance.weaponEquipment1.getWeaponDebugStats();
-                        break;
-                    }
-                case Player.weaponSlots.weaponEquipment2:
-                    {
-                        weaponDebugStatsGet = Player.instance.weaponEquipment2.getWeaponDebugStats();
-                        break;
-                    }
-                case Player.weaponSlots.weaponEquipment3:
-                    {
-                        weaponDebugStatsGet = Player.instance.weaponEquipment3.getWeaponDebugStats();
-                        break;
-                    }
-                default:
-                    {
-                        weaponDebugStatsGet = new StringBuilder();
-                        break;
-                    }
-            }
+            weaponDebugStatsGet = Player.instance.weaponEquipped.getWeaponDebugStats();
+            //switch (weaponSlot)
+            //{
+            //    case Player.weaponSlots.weaponPrimary:
+            //        {
+            //            weaponDebugStatsGet = Player.instance.weaponPrimary.getWeaponDebugStats();
+            //            break;
+            //        }
+            //    case Player.weaponSlots.weaponSecondary:
+            //        {
+            //            weaponDebugStatsGet = Player.instance.weaponSecondary.getWeaponDebugStats();
+            //            break;
+            //        }
+            //    case Player.weaponSlots.weaponMelee:
+            //        {
+            //            weaponDebugStatsGet = Player.instance.weaponMelee.getWeaponDebugStats();
+            //            break;
+            //        }
+            //    case Player.weaponSlots.weaponEquipment1:
+            //        {
+            //            weaponDebugStatsGet = Player.instance.weaponEquipment1.getWeaponDebugStats();
+            //            break;
+            //        }
+            //    case Player.weaponSlots.weaponEquipment2:
+            //        {
+            //            weaponDebugStatsGet = Player.instance.weaponEquipment2.getWeaponDebugStats();
+            //            break;
+            //        }
+            //    case Player.weaponSlots.weaponEquipment3:
+            //        {
+            //            weaponDebugStatsGet = Player.instance.weaponEquipment3.getWeaponDebugStats();
+            //            break;
+            //        }
+            //    default:
+            //        {
+            //            weaponDebugStatsGet = new StringBuilder();
+            //            break;
+            //        }
+            //}
             StringBuilder weaponDebugStats = 
                 new StringBuilder().Append("weapon;\nequippedSlot: ").Append(Enum.GetName(weaponSlot.GetType(), weaponSlot))
                 .Append("\n").Append(weaponDebugStatsGet);
             uiWeaponStats.text = weaponDebugStats.ToString();
-
-            //    string.Format("weapon;\nequippedSlot: {0}\n{1}", weaponSlot.ToString(), weaponDebugStats.ToString());
             yield return new WaitForEndOfFrame();
+            
         }
     }
 

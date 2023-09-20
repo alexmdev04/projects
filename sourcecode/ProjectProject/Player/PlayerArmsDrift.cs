@@ -27,6 +27,7 @@ public class PlayerArmsDrift : MonoBehaviour
         walkingAnimYMultiplier,
         walkingAnimRotMultiplier,
         walkingAnimDelay,
+        walkingAnimCameraBobMultiplier = 0.5f,
         lookSwayXMultiplier = 0.01f,
         lookSwayYMultiplier = 0.01f;
     Vector3
@@ -128,6 +129,7 @@ public class PlayerArmsDrift : MonoBehaviour
         rotationTemp += new Vector3(Mathf.Clamp(Player.instance.mouseRotation.y, -1000, 1000) * lookSwayXMultiplier, Mathf.Clamp(-Player.instance.mouseRotation.x, -1000, 1000) * lookSwayYMultiplier, 0f);
         Quaternion driftRotationOutput = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(rotationTemp), Time.deltaTime * rotationToStateSpeed);
         transform.localRotation = Quaternion.Euler(driftRotationOutput.eulerAngles);// + PlayerArms.instance.pnVector);
+        Camera.main.transform.localPosition = new Vector3(0f, Player.instance.playerCameraHeight, 0f) + (driftPositionOutput * walkingAnimCameraBobMultiplier);
 
         #region debug data gathering
         debugDriftPositionTarget = new StringBuilder()

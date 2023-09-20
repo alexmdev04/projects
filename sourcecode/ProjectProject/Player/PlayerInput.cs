@@ -55,7 +55,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""weaponPrimary"",
+                    ""name"": ""Primary_Weapon"",
                     ""type"": ""Button"",
                     ""id"": ""f932e87c-a73d-4d00-9b84-1c495d850262"",
                     ""expectedControlType"": ""Button"",
@@ -64,7 +64,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""weaponSecondary"",
+                    ""name"": ""Secondary_Weapon"",
                     ""type"": ""Button"",
                     ""id"": ""5f540b5e-dbed-4077-a73e-0f2973233998"",
                     ""expectedControlType"": ""Button"",
@@ -73,7 +73,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""weaponMelee"",
+                    ""name"": ""Melee_Weapon"",
                     ""type"": ""Button"",
                     ""id"": ""37a1fb60-5848-48a7-bb2c-a36fe74cbc78"",
                     ""expectedControlType"": ""Button"",
@@ -82,7 +82,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""weaponEquipment1"",
+                    ""name"": ""Equipment1"",
                     ""type"": ""Button"",
                     ""id"": ""9aa3eab9-1bfe-4834-8839-22368e6101be"",
                     ""expectedControlType"": ""Button"",
@@ -100,7 +100,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""WeaponSlotUp"",
+                    ""name"": ""Weapon_Slot_Up"",
                     ""type"": ""Value"",
                     ""id"": ""df930921-d408-473e-b815-16fed8206217"",
                     ""expectedControlType"": ""Axis"",
@@ -109,13 +109,22 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""WeaponSlotDown"",
+                    ""name"": ""Weapon_Slot_Down"",
                     ""type"": ""Value"",
                     ""id"": ""e31b5e67-fb95-4733-a170-ecdfdcf37adc"",
                     ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""431028c9-a003-4968-8d31-e3ff3df4d0ed"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -247,7 +256,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""weaponPrimary"",
+                    ""action"": ""Primary_Weapon"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -258,7 +267,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""weaponSecondary"",
+                    ""action"": ""Secondary_Weapon"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -269,7 +278,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""weaponEquipment1"",
+                    ""action"": ""Equipment1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -280,7 +289,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""weaponMelee"",
+                    ""action"": ""Melee_Weapon"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -302,7 +311,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""WeaponSlotUp"",
+                    ""action"": ""Weapon_Slot_Up"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -313,7 +322,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""KBM"",
-                    ""action"": ""WeaponSlotDown"",
+                    ""action"": ""Weapon_Slot_Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""196156e3-612b-4056-babf-252a17301513"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -344,13 +364,14 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
-        m_Player_weaponPrimary = m_Player.FindAction("weaponPrimary", throwIfNotFound: true);
-        m_Player_weaponSecondary = m_Player.FindAction("weaponSecondary", throwIfNotFound: true);
-        m_Player_weaponMelee = m_Player.FindAction("weaponMelee", throwIfNotFound: true);
-        m_Player_weaponEquipment1 = m_Player.FindAction("weaponEquipment1", throwIfNotFound: true);
+        m_Player_Primary_Weapon = m_Player.FindAction("Primary_Weapon", throwIfNotFound: true);
+        m_Player_Secondary_Weapon = m_Player.FindAction("Secondary_Weapon", throwIfNotFound: true);
+        m_Player_Melee_Weapon = m_Player.FindAction("Melee_Weapon", throwIfNotFound: true);
+        m_Player_Equipment1 = m_Player.FindAction("Equipment1", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
-        m_Player_WeaponSlotUp = m_Player.FindAction("WeaponSlotUp", throwIfNotFound: true);
-        m_Player_WeaponSlotDown = m_Player.FindAction("WeaponSlotDown", throwIfNotFound: true);
+        m_Player_Weapon_Slot_Up = m_Player.FindAction("Weapon_Slot_Up", throwIfNotFound: true);
+        m_Player_Weapon_Slot_Down = m_Player.FindAction("Weapon_Slot_Down", throwIfNotFound: true);
+        m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -415,13 +436,14 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Shoot;
-    private readonly InputAction m_Player_weaponPrimary;
-    private readonly InputAction m_Player_weaponSecondary;
-    private readonly InputAction m_Player_weaponMelee;
-    private readonly InputAction m_Player_weaponEquipment1;
+    private readonly InputAction m_Player_Primary_Weapon;
+    private readonly InputAction m_Player_Secondary_Weapon;
+    private readonly InputAction m_Player_Melee_Weapon;
+    private readonly InputAction m_Player_Equipment1;
     private readonly InputAction m_Player_Interact;
-    private readonly InputAction m_Player_WeaponSlotUp;
-    private readonly InputAction m_Player_WeaponSlotDown;
+    private readonly InputAction m_Player_Weapon_Slot_Up;
+    private readonly InputAction m_Player_Weapon_Slot_Down;
+    private readonly InputAction m_Player_Jump;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
@@ -429,13 +451,14 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
-        public InputAction @weaponPrimary => m_Wrapper.m_Player_weaponPrimary;
-        public InputAction @weaponSecondary => m_Wrapper.m_Player_weaponSecondary;
-        public InputAction @weaponMelee => m_Wrapper.m_Player_weaponMelee;
-        public InputAction @weaponEquipment1 => m_Wrapper.m_Player_weaponEquipment1;
+        public InputAction @Primary_Weapon => m_Wrapper.m_Player_Primary_Weapon;
+        public InputAction @Secondary_Weapon => m_Wrapper.m_Player_Secondary_Weapon;
+        public InputAction @Melee_Weapon => m_Wrapper.m_Player_Melee_Weapon;
+        public InputAction @Equipment1 => m_Wrapper.m_Player_Equipment1;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
-        public InputAction @WeaponSlotUp => m_Wrapper.m_Player_WeaponSlotUp;
-        public InputAction @WeaponSlotDown => m_Wrapper.m_Player_WeaponSlotDown;
+        public InputAction @Weapon_Slot_Up => m_Wrapper.m_Player_Weapon_Slot_Up;
+        public InputAction @Weapon_Slot_Down => m_Wrapper.m_Player_Weapon_Slot_Down;
+        public InputAction @Jump => m_Wrapper.m_Player_Jump;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -454,27 +477,30 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Shoot.started += instance.OnShoot;
             @Shoot.performed += instance.OnShoot;
             @Shoot.canceled += instance.OnShoot;
-            @weaponPrimary.started += instance.OnWeaponPrimary;
-            @weaponPrimary.performed += instance.OnWeaponPrimary;
-            @weaponPrimary.canceled += instance.OnWeaponPrimary;
-            @weaponSecondary.started += instance.OnWeaponSecondary;
-            @weaponSecondary.performed += instance.OnWeaponSecondary;
-            @weaponSecondary.canceled += instance.OnWeaponSecondary;
-            @weaponMelee.started += instance.OnWeaponMelee;
-            @weaponMelee.performed += instance.OnWeaponMelee;
-            @weaponMelee.canceled += instance.OnWeaponMelee;
-            @weaponEquipment1.started += instance.OnWeaponEquipment1;
-            @weaponEquipment1.performed += instance.OnWeaponEquipment1;
-            @weaponEquipment1.canceled += instance.OnWeaponEquipment1;
+            @Primary_Weapon.started += instance.OnPrimary_Weapon;
+            @Primary_Weapon.performed += instance.OnPrimary_Weapon;
+            @Primary_Weapon.canceled += instance.OnPrimary_Weapon;
+            @Secondary_Weapon.started += instance.OnSecondary_Weapon;
+            @Secondary_Weapon.performed += instance.OnSecondary_Weapon;
+            @Secondary_Weapon.canceled += instance.OnSecondary_Weapon;
+            @Melee_Weapon.started += instance.OnMelee_Weapon;
+            @Melee_Weapon.performed += instance.OnMelee_Weapon;
+            @Melee_Weapon.canceled += instance.OnMelee_Weapon;
+            @Equipment1.started += instance.OnEquipment1;
+            @Equipment1.performed += instance.OnEquipment1;
+            @Equipment1.canceled += instance.OnEquipment1;
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
-            @WeaponSlotUp.started += instance.OnWeaponSlotUp;
-            @WeaponSlotUp.performed += instance.OnWeaponSlotUp;
-            @WeaponSlotUp.canceled += instance.OnWeaponSlotUp;
-            @WeaponSlotDown.started += instance.OnWeaponSlotDown;
-            @WeaponSlotDown.performed += instance.OnWeaponSlotDown;
-            @WeaponSlotDown.canceled += instance.OnWeaponSlotDown;
+            @Weapon_Slot_Up.started += instance.OnWeapon_Slot_Up;
+            @Weapon_Slot_Up.performed += instance.OnWeapon_Slot_Up;
+            @Weapon_Slot_Up.canceled += instance.OnWeapon_Slot_Up;
+            @Weapon_Slot_Down.started += instance.OnWeapon_Slot_Down;
+            @Weapon_Slot_Down.performed += instance.OnWeapon_Slot_Down;
+            @Weapon_Slot_Down.canceled += instance.OnWeapon_Slot_Down;
+            @Jump.started += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -488,27 +514,30 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Shoot.started -= instance.OnShoot;
             @Shoot.performed -= instance.OnShoot;
             @Shoot.canceled -= instance.OnShoot;
-            @weaponPrimary.started -= instance.OnWeaponPrimary;
-            @weaponPrimary.performed -= instance.OnWeaponPrimary;
-            @weaponPrimary.canceled -= instance.OnWeaponPrimary;
-            @weaponSecondary.started -= instance.OnWeaponSecondary;
-            @weaponSecondary.performed -= instance.OnWeaponSecondary;
-            @weaponSecondary.canceled -= instance.OnWeaponSecondary;
-            @weaponMelee.started -= instance.OnWeaponMelee;
-            @weaponMelee.performed -= instance.OnWeaponMelee;
-            @weaponMelee.canceled -= instance.OnWeaponMelee;
-            @weaponEquipment1.started -= instance.OnWeaponEquipment1;
-            @weaponEquipment1.performed -= instance.OnWeaponEquipment1;
-            @weaponEquipment1.canceled -= instance.OnWeaponEquipment1;
+            @Primary_Weapon.started -= instance.OnPrimary_Weapon;
+            @Primary_Weapon.performed -= instance.OnPrimary_Weapon;
+            @Primary_Weapon.canceled -= instance.OnPrimary_Weapon;
+            @Secondary_Weapon.started -= instance.OnSecondary_Weapon;
+            @Secondary_Weapon.performed -= instance.OnSecondary_Weapon;
+            @Secondary_Weapon.canceled -= instance.OnSecondary_Weapon;
+            @Melee_Weapon.started -= instance.OnMelee_Weapon;
+            @Melee_Weapon.performed -= instance.OnMelee_Weapon;
+            @Melee_Weapon.canceled -= instance.OnMelee_Weapon;
+            @Equipment1.started -= instance.OnEquipment1;
+            @Equipment1.performed -= instance.OnEquipment1;
+            @Equipment1.canceled -= instance.OnEquipment1;
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
-            @WeaponSlotUp.started -= instance.OnWeaponSlotUp;
-            @WeaponSlotUp.performed -= instance.OnWeaponSlotUp;
-            @WeaponSlotUp.canceled -= instance.OnWeaponSlotUp;
-            @WeaponSlotDown.started -= instance.OnWeaponSlotDown;
-            @WeaponSlotDown.performed -= instance.OnWeaponSlotDown;
-            @WeaponSlotDown.canceled -= instance.OnWeaponSlotDown;
+            @Weapon_Slot_Up.started -= instance.OnWeapon_Slot_Up;
+            @Weapon_Slot_Up.performed -= instance.OnWeapon_Slot_Up;
+            @Weapon_Slot_Up.canceled -= instance.OnWeapon_Slot_Up;
+            @Weapon_Slot_Down.started -= instance.OnWeapon_Slot_Down;
+            @Weapon_Slot_Down.performed -= instance.OnWeapon_Slot_Down;
+            @Weapon_Slot_Down.canceled -= instance.OnWeapon_Slot_Down;
+            @Jump.started -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -540,12 +569,13 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
-        void OnWeaponPrimary(InputAction.CallbackContext context);
-        void OnWeaponSecondary(InputAction.CallbackContext context);
-        void OnWeaponMelee(InputAction.CallbackContext context);
-        void OnWeaponEquipment1(InputAction.CallbackContext context);
+        void OnPrimary_Weapon(InputAction.CallbackContext context);
+        void OnSecondary_Weapon(InputAction.CallbackContext context);
+        void OnMelee_Weapon(InputAction.CallbackContext context);
+        void OnEquipment1(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
-        void OnWeaponSlotUp(InputAction.CallbackContext context);
-        void OnWeaponSlotDown(InputAction.CallbackContext context);
+        void OnWeapon_Slot_Up(InputAction.CallbackContext context);
+        void OnWeapon_Slot_Down(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
     }
 }

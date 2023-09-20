@@ -54,13 +54,11 @@ public class Weapon : MonoBehaviour
         weaponAimTime = 0f, // in seconds
         weaponReloadTime = 0f, // in seconds
         weaponWeight = 0f;
-    int
-        weaponAmmoMagMax,
-        weaponAmmoMagCurrent,
-        weaponAmmoStock;
+    public int weaponAmmoMagMax { get; private set; }
+    public int weaponAmmoMagCurrent { get; private set; }
+    public int weaponAmmoStock { get; private set; }
     GameObject
         weaponModel;
-
     float
         weaponFireRateElasped;
     bool
@@ -84,6 +82,7 @@ public class Weapon : MonoBehaviour
             PlayerArms.instance.playerArmsAnimate(weaponOriginAnim, weapon);
         }
         if (weaponFireRateElasped > 0) { weaponFireRateElasped -= Time.deltaTime; }
+        if (Input.GetKeyDown(KeyCode.R)) { weaponReload(); }
     }
     void LateUpdate()
     {
@@ -112,7 +111,7 @@ public class Weapon : MonoBehaviour
                             }
                             else
                             {
-                                weaponShootPassed();
+                                if (weaponAmmoCheck()) { weaponShootPassed(); }
                                 weaponFireRateElasped = weaponFireRate;
                                 break;
                             }
@@ -126,32 +125,32 @@ public class Weapon : MonoBehaviour
                         }
                         else
                         {
-                            weaponShootPassed();
+                            if (weaponAmmoCheck()) { weaponShootPassed(); }
                             weaponFireRateElasped = weaponFireRate;
                             break;
                         }
                     }
                 case WeaponData.weaponFireTypes.burst:
                     {
+                        Debug.LogError("Fire type weaponFireTypes.burst not implemented");
                         break;
                     }
                 case WeaponData.weaponFireTypes.boltAction:
                     {
+                        Debug.LogError("Fire type weaponFireTypes.boltAction not implemented");
                         break;
                     }
                 case WeaponData.weaponFireTypes.melee:
                     {
+                        Debug.LogError("Fire type weaponFireTypes.melee not implemented");
                         break;
                     }
                 case WeaponData.weaponFireTypes.equipment:
                     {
+                        Debug.LogError("Fire type weaponFireTypes.equipment not implemented");
                         break;
                     }
             }
-            {
-
-            }
-
             //weaponAnimate(weaponShootAnim);
         }
     }
@@ -162,10 +161,7 @@ public class Weapon : MonoBehaviour
         PlayerArms.instance.playerArmsAnimate(weaponShootAnim, weapon);
         PlayerArms.instance.playerArmsPNShootRecoil();
     }
-    public void weaponReload()
-    {
 
-    }
     public void weaponEquip()
     {
         PlayerArms.instance.playerArmsAnimate(weaponEquipAnim, weapon);
@@ -191,87 +187,6 @@ public class Weapon : MonoBehaviour
         weaponFireRateElasped = 0f;
         
     }
-
-    #region weaponSway
-    //public float
-    //    positionStep = 0.01f,
-    //    maxStepDistanceX = 0.05f,
-    //    maxStepDistanceY = 0.025f,
-    //    rotationStep = 0.1f,
-    //    maxRotationStepX = 0.5f,
-    //    maxRotationStepY = 0.25f,
-    //    speedCurve,
-    //    bobExaggeration,
-    //    speedCurveMultiplier;
-    //Vector3 
-    //    swayPos,
-    //    swayEulerRot,
-    //    mouseRotation,
-    //    bobPosition,
-    //    bobEulerRotation;
-    //public Vector3 
-    //    travelLimit = Vector3.one * 0.025f,
-    //    bobLimit = Vector3.one * 0.01f,
-    //    multiplier;
-    //float curveSin { get => Mathf.Sin(speedCurve); }
-    //float curveCos { get => Mathf.Cos(speedCurve); }
-    //public bool isGrounded = true;
-    //void getInput()
-    //{
-    //    mouseRotation = Player.instance.input.Player.Look.ReadValue<Vector2>();
-    //}
-    //void weaponSwayPosition()
-    //{
-    //    // +x = up
-    //    // +y = right
-    //    //transform.localEulerAngles = Vector3.Slerp(transform.localEulerAngles, mouseRotation * weaponSwayMultiplier, weaponSwaySmoothing * Time.deltaTime);
-    //    Vector2 invertLook = mouseRotation * -positionStep;
-    //    invertLook = new Vector2(
-    //        Mathf.Clamp(invertLook.x, -maxStepDistanceX, maxStepDistanceX), 
-    //        Mathf.Clamp(invertLook.y, -maxStepDistanceY, maxStepDistanceY));
-    //    swayPos = invertLook;
-    //}
-    //void weaponSwayRotation()
-    //{
-    //    Vector3 invertRotation = mouseRotation * rotationStep;
-    //    invertRotation = new Vector3(
-    //        Mathf.Clamp(invertRotation.x, -maxRotationStepX, maxRotationStepX), 
-    //        Mathf.Clamp(invertRotation.y, -maxRotationStepY, maxRotationStepY));
-    //    swayEulerRot = new Vector3(invertRotation.y, invertRotation.x, invertRotation.z);
-    //}
-    //void weaponBobOffset()
-    //{
-    //    speedCurve += (Time.deltaTime * (isGrounded ? Player.instance.rb.velocity.magnitude : 1f) + 0.01f) * speedCurveMultiplier;
-
-    //    bobPosition.x = 
-    //        (curveCos * bobLimit.x * (isGrounded ? 1 : 0)) 
-    //        - (Player.instance.movementDirection.x * travelLimit.x);
-    //    bobPosition.y = 
-    //        (curveSin * bobLimit.y) 
-    //        - (Player.instance.rb.velocity.y * travelLimit.y);
-    //    bobPosition.z = 
-    //        -(Player.instance.movementDirection.y * travelLimit.z);
-    //}
-    //void weaponBobRotation()
-    //{
-    //    bobEulerRotation.x = (Player.instance.movementDirection != Vector3.zero ? multiplier.x * (Mathf.Sin(2 * speedCurve)) : 
-    //                                                                              multiplier.x * (Mathf.Sin(2 * speedCurve) / 2));
-    //    bobEulerRotation.y = (Player.instance.movementDirection != Vector3.zero ? multiplier.y * curveCos : 0);
-    //    bobEulerRotation.z = (Player.instance.movementDirection != Vector3.zero ? multiplier.z * curveCos * Player.instance.movementDirection.x : 0);
-    //}
-    //void weaponSwayCombine()
-    //{
-    //    transform.localPosition = 
-    //        Vector3.Lerp(transform.localPosition,
-    //        swayPos + bobPosition, 
-    //        Time.deltaTime * weaponSwaySmoothing);
-    //    transform.localRotation = 
-    //        Quaternion.Slerp(transform.localRotation,
-    //        Quaternion.Euler(swayEulerRot) * Quaternion.Euler(bobEulerRotation), 
-    //        Time.deltaTime * weaponSwaySmoothingRot);
-    //}
-    #endregion weaponSway
-
     public void setWeapon
         (
         WeaponData.weaponList _weapon,
@@ -288,6 +203,8 @@ public class Weapon : MonoBehaviour
         float aimTime,
         float reloadTime,
         float recoverySpeed,
+        int ammoMagMax,
+        int ammoStock,
         float weight = 50f,
         int burstAmount = 0
         )
@@ -312,6 +229,9 @@ public class Weapon : MonoBehaviour
         weaponAimTime = aimTime;
         weaponReloadTime = reloadTime;
         weaponRecoverySpeed = recoverySpeed;
+        weaponAmmoMagMax = ammoMagMax;
+        weaponAmmoMagCurrent = weaponAmmoMagMax;
+        weaponAmmoStock = ammoStock;
         weaponWeight = weight;
         weaponBurstAmount = burstAmount;
     }
@@ -392,5 +312,53 @@ public class Weapon : MonoBehaviour
     {
         weaponAnimation.Stop();
         weaponAnimation.Play(animation);
+    }
+    public void weaponReload()
+    {
+        if (weaponAmmoStock <= 0 && weaponAmmoMagCurrent <= 0)
+        {
+            //Debug.Log(weaponNameInternal + " fully empty");
+            return;
+        }
+        if (weaponAmmoStock <= 0)
+        {
+            //Debug.Log(weaponNameInternal + " stock empty");
+            return;
+        }
+        if (weaponAmmoMagCurrent == weaponAmmoMagMax)
+        {
+            //Debug.Log(weaponNameInternal + " mag full");
+            return;
+        }
+        if (weaponAmmoMagCurrent < weaponAmmoMagMax && weaponAmmoStock - (weaponAmmoMagMax - weaponAmmoMagCurrent) > 0)
+        {
+            weaponAmmoStock -= (weaponAmmoMagMax - weaponAmmoMagCurrent);
+            weaponAmmoMagCurrent = weaponAmmoMagMax;
+            //Debug.Log(weaponNameInternal + " reloaded");
+            return;
+        }
+        if (weaponAmmoStock < weaponAmmoMagMax)
+        {
+            weaponAmmoMagCurrent += weaponAmmoStock;
+            weaponAmmoStock = 0;
+            //Debug.Log(weaponNameInternal + " reloaded (<1 full mag left)");
+            return;
+        }
+        weaponAmmoStock -= weaponAmmoMagMax;
+        weaponAmmoMagCurrent = weaponAmmoMagMax;
+    }
+    bool weaponAmmoCheck()
+    {
+        if (weaponAmmoMagCurrent > 0)
+        {
+            weaponAmmoMagCurrent -= 1;
+            return true;
+        }
+        else
+        {
+            //Debug.Log(weaponNameInternal + " mag empty");
+            weaponReload();
+            return false;
+        }
     }
 }

@@ -8,7 +8,8 @@ public class Player : MonoBehaviour
     public int
         targetFramerate = 165;
     public float
-        weaponRecoverySpeed;
+        weaponRecoverySpeed,
+        playerCameraHeight = 0.825f;
     public GameObject 
         playerArmsPrefab;
     public PlayerInput 
@@ -40,21 +41,24 @@ public class Player : MonoBehaviour
     }
     public weaponSlots 
         weaponSlotEquipped;
-    [SerializeField] bool createDefaultWeapons, defaultWeaponsEquippable;
+    public bool 
+        defaultWeaponsEquippable;
+    [SerializeField] bool createDefaultWeapons,  weaponScrollWrapAround;
     [SerializeField] float
         movementSpeed = 4f,
         lookSensitivity = 1f,
         movementAcceleration = 0.1f,
-        movementDecceleration = 0.05f;
+        movementDecceleration = 0.05f,
+        playerJumpForce = 5f,
+        playerHeightCM = 180f;
+    [SerializeField] GameObject playerCapsule;
+    Rigidbody playerRigidbody;
     float
         lookRotX,
         lookRotY;
-    Rigidbody 
-        playerRigidbody;
     Vector3
         smoothInputVelocity,
         smoothInput;
-
 
     void Awake()
     {
@@ -65,13 +69,13 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         input = new();
-        //input.Player.Shoot.performed += ctx => playerShoot();
-        input.Player.weaponPrimary.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponPrimary);
-        input.Player.weaponSecondary.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponSecondary);
-        input.Player.weaponMelee.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponMelee);
-        input.Player.weaponEquipment1.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponEquipment1);
-        input.Player.WeaponSlotUp.performed += ctx => playerEquipSlotScroll(true, false); 
-        input.Player.WeaponSlotDown.performed += ctx => playerEquipSlotScroll(false, false);
+        input.Player.Primary_Weapon.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponPrimary);
+        input.Player.Secondary_Weapon.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponSecondary);
+        input.Player.Melee_Weapon.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponMelee);
+        input.Player.Equipment1.performed += ctx => playerEquipWeaponBySlot(weaponSlots.weaponEquipment1);
+        input.Player.Weapon_Slot_Up.performed += ctx => playerEquipSlotScroll(true); 
+        input.Player.Weapon_Slot_Down.performed += ctx => playerEquipSlotScroll(false);
+        input.Player.Jump.performed += ctx => playerJump();
         input.Player.Enable();
     }
     void Start()
@@ -87,6 +91,7 @@ public class Player : MonoBehaviour
     }
     void Update()
     {
+        playerCapsule.transform.localScale = new Vector3(playerCapsule.transform.localScale.x, playerHeightCM / 200, playerCapsule.transform.localScale.z);
         Application.targetFrameRate = targetFramerate;
         checkEquippedWeapon();
         movementDirection = input.Player.Move.ReadValue<Vector3>();
@@ -104,6 +109,7 @@ public class Player : MonoBehaviour
         {
             playerShoot();
         }
+        if (Input.GetKeyDown(KeyCode.Space)) { playerJump(); }
     }
     void FixedUpdate()
     {
@@ -135,6 +141,10 @@ public class Player : MonoBehaviour
     {
         smoothInput = Vector3.SmoothDamp(smoothInput, movementDirection, ref smoothInputVelocity, acceleration);
         playerRigidbody.MovePosition(playerRigidbody.position + (movementSpeed * Time.deltaTime * transform.TransformDirection(smoothInput)));
+    }
+    void playerJump()
+    {
+        playerRigidbody.AddForce(playerJumpForce * Vector3.up, ForceMode.VelocityChange);
     }
     void playerShoot()
     {
@@ -397,25 +407,65 @@ public class Player : MonoBehaviour
             }
         }
     }
-    void playerEquipSlotScroll(bool up, bool wrapAround)
+    void playerEquipSlotScroll(bool up)
     {
+        switch (weaponSlotEquipped)
+        {
+            case weaponSlots.weaponPrimary:
+                break;
+            case weaponSlots.weaponSecondary:
+                break;
+            case weaponSlots.weaponMelee:
+                break;
+            case weaponSlots.weaponEquipment1:
+                break;
+            case weaponSlots.weaponEquipment2:
+                break;
+            case weaponSlots.weaponEquipment3:
+                break;
+            default:
+                break;
+        }
+
+        if (up)
+        {
+
+        }
+
         int slotChange;
         if (up)
         {
-            if (!wrapAround && weaponSlotEquipped == weaponSlots.weaponMelee)
+            if (weaponSlotEquipped == weaponSlots.weaponMelee) 
             {
-                return;
+                if (weaponScrollWrapAround)
+                {
+                    playerEquipWeaponBySlot(weaponSlots.weaponPrimary);
+                    return;
+                }
+                else
+                {
+                    return;
+                }
             }
             slotChange = 1;
         }
         else
         {
-            if (!wrapAround && weaponSlotEquipped == weaponSlots.weaponPrimary)
+            if (weaponSlotEquipped == weaponSlots.weaponPrimary)
             {
-                return;
+                if (weaponScrollWrapAround)
+                {
+                    playerEquipWeaponBySlot(weaponSlots.weaponMelee);
+                    return;
+                }
+                else
+                {
+                    return;
+                }
             }
             slotChange = -1;
         }
+        if (weaponSecondary.weapon == WeaponData.weaponList.defaultWeapon && !defaultWeaponsEquippable) { slotChange *= 2; }
         playerEquipWeaponBySlot(weaponSlotEquipped + slotChange);
     }
     void playerDestroyWeapon(Weapon weapon)

@@ -1,102 +1,38 @@
-using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.InputSystem;
-using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 public class uiInventory : MonoBehaviour
 {
-    [SerializeField] bool ifDefaultHideSlot = true;
+    public static uiInventory instance { get; private set; }
+    public bool ifDefaultHideSlot = true;
+    [SerializeField] float animOutDistance = -40, animInDistance = -20f, animSpeed = 1f;
+    [SerializeField] Color animOutColour, animInColour;
+    [SerializeField] List<uiWeaponSlot> uiWeaponSlots;
 
-    [Space]
-    [Header("weaponMelee")]
-    [SerializeField] GameObject uiWeaponMelee;
-    [SerializeField] Image uiWeaponMeleeIcon;
-    [SerializeField] TextMeshProUGUI uiWeaponMeleeBindingName;
-    [SerializeField] TextMeshProUGUI uiWeaponMeleeName;
-
-    [Space]
-    [Header("weaponSecondary")]
-    [SerializeField] GameObject uiWeaponSecondary;
-    [SerializeField] Image uiWeaponSecondaryIcon;
-    [SerializeField] TextMeshProUGUI uiWeaponSecondaryBindingName;
-    [SerializeField] TextMeshProUGUI uiWeaponSecondaryName;
-
-    [Space]
-    [Header("weaponPrimary")]
-    [SerializeField] GameObject uiWeaponPrimary;
-    [SerializeField] Image uiWeaponPrimaryIcon;
-    [SerializeField] TextMeshProUGUI uiWeaponPrimaryBindingName;
-    [SerializeField] TextMeshProUGUI uiWeaponPrimaryName;
-
-    void Update()
-    {
-        uiInventoryRefresh(
-            weapon: Player.instance.weaponMelee,
-            uiWeapon: uiWeaponMelee, 
-            uiWeaponName: uiWeaponMeleeName,
-            uiWeaponBindingName: uiWeaponMeleeBindingName,
-            uiWeaponIcon: uiWeaponMeleeIcon, 
-            uiWeaponBinding: Player.instance.input.Player.weaponPrimary);
-
-        uiInventoryRefresh(
-            weapon: Player.instance.weaponSecondary,
-            uiWeapon: uiWeaponSecondary,
-            uiWeaponName: uiWeaponSecondaryName,
-            uiWeaponBindingName: uiWeaponSecondaryBindingName,
-            uiWeaponIcon: uiWeaponSecondaryIcon,
-            uiWeaponBinding: Player.instance.input.Player.weaponSecondary);
-
-        uiInventoryRefresh(
-            weapon: Player.instance.weaponPrimary,
-            uiWeapon: uiWeaponPrimary,
-            uiWeaponName: uiWeaponPrimaryName,
-            uiWeaponBindingName: uiWeaponPrimaryBindingName,
-            uiWeaponIcon: uiWeaponPrimaryIcon, 
-            uiWeaponBinding: Player.instance.input.Player.weaponPrimary);
+    void Awake() { instance = this; }
+    void Update() 
+    { 
+        uiInventorySlotSelectAnimation();
     }
-    void uiInventoryRefresh(
-        Weapon weapon,
-        GameObject uiWeapon,
-        TextMeshProUGUI uiWeaponName,
-        TextMeshProUGUI uiWeaponBindingName,
-        Image uiWeaponIcon,
-        InputAction uiWeaponBinding)
+    void uiInventorySlotSelectAnimation()
     {
-        if (weapon.weapon == WeaponData.weaponList.defaultWeapon && ifDefaultHideSlot)
+        foreach (uiWeaponSlot slot in uiWeaponSlots)
         {
-            uiWeapon.gameObject.SetActive(false);
-        }
-        else
-        {
-            uiWeapon.gameObject.SetActive(true);
-            uiInventoryCheckWeapon(uiWeaponName, weapon, uiWeaponIcon);
-            uiWeaponBindingName.text = uiWeaponBinding.GetBindingDisplayString();
-        }
-    }
-    void uiInventoryCheckWeapon(TextMeshProUGUI currentUIName, Weapon weaponToCheck, Image iconToSet)
-    {
-        if (currentUIName.text != weaponToCheck.weaponNameExternal)
-        {
-            currentUIName.text = weaponToCheck.weaponNameExternal;
-            uiInventorySetIcon(iconToSet, weaponToCheck);
-        }
-    }
-    void uiInventorySetIcon(Image weaponIcon, Weapon weapon)
-    {
-        if (weapon.weapon != WeaponData.weaponList.defaultWeapon)
-        {
-            AsyncOperationHandle<Sprite> weaponSprite = Addressables.LoadAssetAsync<Sprite>("Assets/Textures/Weapon Icons/" + weapon.weaponNameInternal + "_Icon.png");
-            weaponSprite.Completed += delegate { uiInventoryLoadIconCompleted(weaponSprite, weaponIcon); };
-        }
-    }
-    void uiInventoryLoadIconCompleted(AsyncOperationHandle<Sprite> weaponSprite, Image weaponIcon)
-    {
-        if (weaponSprite.Status == AsyncOperationStatus.Succeeded)
-        {
-            weaponIcon.sprite = weaponSprite.Result;
-            Debug.Log("set icon for " + weaponIcon.transform.parent.name);
+            if (slot.weaponSlot == Player.instance.weaponSlotEquipped)
+            { // out anim
+                slot.transform.localPosition = Vector3.Lerp(slot.transform.localPosition, new Vector3(animOutDistance, slot.transform.localPosition.y, slot.transform.localPosition.z), Time.deltaTime * animSpeed);
+                Color uiWeaponSlotColor = Color.Lerp(slot.uiWeaponSlotIcon.color, animOutColour, Time.deltaTime * animSpeed);
+                slot.uiWeaponSlotIcon.color = uiWeaponSlotColor;
+                slot.uiWeaponSlotWeaponName.color = uiWeaponSlotColor;
+
+            }
+            else
+            { // in anim
+                slot.transform.localPosition = Vector3.Lerp(slot.transform.localPosition, new Vector3(animInDistance, slot.transform.localPosition.y, slot.transform.localPosition.z), Time.deltaTime * animSpeed);
+                Color uiWeaponSlotColor = Color.Lerp(slot.uiWeaponSlotIcon.color, animInColour, Time.deltaTime * animSpeed);
+                slot.uiWeaponSlotIcon.color = uiWeaponSlotColor;
+                slot.uiWeaponSlotWeaponName.color = uiWeaponSlotColor;
+            }
         }
     }
 }

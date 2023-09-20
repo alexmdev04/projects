@@ -75,6 +75,9 @@ public class WeaponData : MonoBehaviour
             aimTime = 0f,
             reloadTime = 0f,
             recoverySpeed = 5f;
+        int
+            ammoMagMax = 10,
+            ammoStock = 100;
 
         switch (weapon)
         {
@@ -83,12 +86,14 @@ public class WeaponData : MonoBehaviour
                     type = weaponTypes.gun;
                     originPosition = new Vector3(-0.1426f, 0.6044f, -0.1378f);
                     originRotation = new Vector3(-90, -0f, -180f);
-                    damage = 100;
+                    damage = 100f;
                     fireRate = 1f;
                     equipTime = 1f;
                     aimTime = 0.25f;
                     reloadTime = 1f;
                     recoverySpeed = 10f;
+                    ammoMagMax = 10;
+                    ammoStock = 100;
                     switch (variant)
                     {
                         case 1:
@@ -145,6 +150,8 @@ public class WeaponData : MonoBehaviour
                     aimTime = 0.3f;
                     reloadTime = 1f;
                     recoverySpeed = 5f;
+                    ammoMagMax = 7;
+                    ammoStock = ammoMagMax * 5;
                     break;
                 }
             case weaponList.akm:
@@ -161,11 +168,26 @@ public class WeaponData : MonoBehaviour
                     aimTime = 0.3f;
                     reloadTime = 1f;
                     recoverySpeed = 7.5f;
+                    ammoMagMax = 30;
+                    ammoStock = ammoMagMax * 5;
                     break;
                 }
             case weaponList.fists:
                 {
                     nameExternal = "Fists";
+                    type = weaponTypes.melee; 
+                    slot = Player.weaponSlots.weaponMelee;
+                    fireType = weaponFireTypes.melee;
+                    originPosition = new Vector3();
+                    originRotation = new Vector3();
+                    damage = 50;
+                    fireRate = 0.5f;
+                    equipTime = 1f;
+                    aimTime = 0f;
+                    reloadTime = 0f;
+                    recoverySpeed = 100f;
+                    ammoMagMax = 0;
+                    ammoStock = 0;
                     break;
                 }
             case weaponList.knife:
@@ -182,6 +204,8 @@ public class WeaponData : MonoBehaviour
                     aimTime = 0f;
                     reloadTime = 0f;
                     recoverySpeed = 100f;
+                    ammoMagMax = 0;
+                    ammoStock = 0;
                     break;
                 }
             default:
@@ -194,21 +218,18 @@ public class WeaponData : MonoBehaviour
         newWeaponParent = PlayerArms.instance.gameObject.transform.Find("Hands").Find("weaponBone");
         if (newWeaponParent == null)
         {
-            Debug.LogError("No transform found! (playerArms/Hands/" + newWeaponNameInternal + "_Weapon)");
+            Debug.LogError("weaponBone not found! (playerArms/Hands/weaponBone)");
             newWeaponParent = PlayerArms.instance.gameObject.transform.Find("Hands");
         }
         
         // creating default model in case model loading fails, also makes sure layer is set to viewmodel
         newWeaponObj = null;
         newWeaponObj = Instantiate(weaponDefault, newWeaponParent);
-        //newWeaponObj.layer = 3;
-        //newWeaponObj.transform.localScale = Vector3.one;
-        //newWeaponObj.transform.localPosition = Vector3.zero;
 
         // creates weapon component and sets its data
         newWeapon = null;
         newWeapon = newWeaponObj.AddComponent<Weapon>();
-        newWeapon.setWeapon(weapon, nameExternal, variant, type, slot, fireType, originPosition, originRotation, damage, fireRate, equipTime, aimTime, reloadTime, recoverySpeed);
+        newWeapon.setWeapon(weapon, nameExternal, variant, type, slot, fireType, originPosition, originRotation, damage, fireRate, equipTime, aimTime, reloadTime, recoverySpeed, ammoMagMax, ammoStock);
         Player.instance.weaponsHeld.Add(newWeapon);
 
         // adding weapon model
