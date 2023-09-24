@@ -87,7 +87,7 @@ public class WeaponData : MonoBehaviour
                     originPosition = new Vector3(-0.1426f, 0.6044f, -0.1378f);
                     originRotation = new Vector3(-90, -0f, -180f);
                     damage = 100f;
-                    fireRate = 1f;
+                    fireRate = 0.5f;
                     equipTime = 1f;
                     aimTime = 0.25f;
                     reloadTime = 1f;
@@ -256,7 +256,7 @@ public class WeaponData : MonoBehaviour
         try
         {
             AsyncOperationHandle<GameObject> weaponModel = Addressables.LoadAssetAsync<GameObject>(path);
-            weaponModel.Completed += delegate { loadWeaponModelCompleted(weaponModel, parentObj); };
+            weaponModel.Completed += delegate { loadWeaponModelCompleted(ref weaponModel, parentObj); };
         }
         catch (InvalidKeyException)
         {
@@ -268,7 +268,7 @@ public class WeaponData : MonoBehaviour
         }
     }
 
-    void loadWeaponModelCompleted(AsyncOperationHandle<GameObject> weaponModel, Transform parentObj)
+    void loadWeaponModelCompleted(ref AsyncOperationHandle<GameObject> weaponModel, Transform parentObj)
     {
         if (weaponModel.Status == AsyncOperationStatus.Succeeded)
         {
@@ -292,14 +292,14 @@ public class WeaponData : MonoBehaviour
         try
         {
             AsyncOperationHandle<IList<AnimationClip>> animationClips = Addressables.LoadAssetAsync<IList<AnimationClip>>(path);
-            animationClips.Completed += delegate { loadWeaponAnimationClipsCompleted(animationClips); };
+            animationClips.Completed += delegate { loadWeaponAnimationClipsCompleted(ref animationClips); };
         }
         catch (InvalidKeyException) 
         {
             Debug.LogError("No animations found in active playerArms model!");
         }
     }
-    void loadWeaponAnimationClipsCompleted(AsyncOperationHandle<IList<AnimationClip>> animationClips)
+    void loadWeaponAnimationClipsCompleted(ref AsyncOperationHandle<IList<AnimationClip>> animationClips)
     {
         if (animationClips.Status == AsyncOperationStatus.Succeeded)
         {
@@ -324,7 +324,7 @@ public class WeaponData : MonoBehaviour
         try
         {
             AsyncOperationHandle<AudioClip> shootSound = Addressables.LoadAssetAsync<AudioClip>("Assets/Sounds/" + newWeaponNameInternal + "_Shoot_Sound.wav");
-            shootSound.Completed += delegate { loadWeaponSoundCompleted(shootSound); };
+            shootSound.Completed += delegate { loadWeaponSoundCompleted(ref shootSound); };
         }
         catch (InvalidKeyException)
         {
@@ -333,14 +333,14 @@ public class WeaponData : MonoBehaviour
         try
         {
             AsyncOperationHandle<AudioClip> equipSound = Addressables.LoadAssetAsync<AudioClip>("Assets/Sounds/" + newWeaponNameInternal + "_Equip_Sound.wav");
-            equipSound.Completed += delegate { loadWeaponSoundCompleted(equipSound); };
+            equipSound.Completed += delegate { loadWeaponSoundCompleted(ref equipSound); };
         }
         catch (InvalidKeyException)
         {
             Debug.LogError(newWeaponNameInternal + "_Equip_Sound not found!");
         }
     }
-    void loadWeaponSoundCompleted(AsyncOperationHandle<AudioClip> sound)
+    void loadWeaponSoundCompleted(ref AsyncOperationHandle<AudioClip> sound)
     {
         if (sound.Status == AsyncOperationStatus.Succeeded)
         {

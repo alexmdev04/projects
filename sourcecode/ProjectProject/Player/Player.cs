@@ -87,7 +87,7 @@ public class Player : MonoBehaviour
             weaponMelee = WeaponData.instance.createWeapon(WeaponData.weaponList.defaultWeapon, 3);
             weaponEquipment1 = WeaponData.instance.createWeapon(WeaponData.weaponList.defaultWeapon, 4);
         }
-        playerEquipWeapon(weaponPrimary, weaponSlots.weaponPrimary, true);
+        playerEquipWeapon(ref weaponPrimary, weaponSlots.weaponPrimary, true);
     }
     void Update()
     {
@@ -95,8 +95,7 @@ public class Player : MonoBehaviour
         Application.targetFrameRate = targetFramerate;
         checkEquippedWeapon();
         movementDirection = input.Player.Move.ReadValue<Vector3>();
-        if (movementDirection != Vector3.zero) { playerMove(movementAcceleration); }
-        else { playerMove(movementDecceleration); }
+        playerMove();
         if (Input.GetKeyDown(KeyCode.F1))
         {
             giveWeapon(WeaponData.weaponList.akm, weaponSlotReplace: true);
@@ -109,7 +108,6 @@ public class Player : MonoBehaviour
         {
             playerShoot();
         }
-        if (Input.GetKeyDown(KeyCode.Space)) { playerJump(); }
     }
     void FixedUpdate()
     {
@@ -137,8 +135,11 @@ public class Player : MonoBehaviour
         // scale mouse rotation for different games cm/360
         Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
     }
-    void playerMove(float acceleration)
+    void playerMove()
     {
+        float acceleration;
+        if (movementDirection != Vector3.zero) { acceleration = movementAcceleration; }
+        else { acceleration = movementDecceleration; }
         smoothInput = Vector3.SmoothDamp(smoothInput, movementDirection, ref smoothInputVelocity, acceleration);
         playerRigidbody.MovePosition(playerRigidbody.position + (movementSpeed * Time.deltaTime * transform.TransformDirection(smoothInput)));
     }
@@ -148,40 +149,7 @@ public class Player : MonoBehaviour
     }
     void playerShoot()
     {
-        weaponEquipped.weaponShoot(); 
-        switch (weaponSlotEquipped)
-        {
-            case weaponSlots.weaponPrimary:
-                {
-                    weaponPrimary.weaponShoot();
-                    break;
-                }
-            case weaponSlots.weaponSecondary:
-                {
-                    weaponSecondary.weaponShoot();
-                    break;
-                }
-            case weaponSlots.weaponMelee:
-                {
-                    weaponMelee.weaponShoot();
-                    break;
-                }
-            case weaponSlots.weaponEquipment1:
-                {
-                    weaponEquipment1.weaponShoot();
-                    break;
-                }
-            case weaponSlots.weaponEquipment2:
-                {
-                    weaponEquipment2.weaponShoot();
-                    break;
-                }
-            case weaponSlots.weaponEquipment3:
-                {
-                    weaponEquipment3.weaponShoot();
-                    break;
-                }
-        }
+        weaponEquipped.weaponShoot();
     }
     public void giveWeapon(WeaponData.weaponList weapon, int variantID = 0, bool weaponSlotReplace = false)
     {
@@ -309,9 +277,9 @@ public class Player : MonoBehaviour
         }
         if (weaponSlotReplace) { playerEquipWeaponBySlot(newWeapon.weaponSlot); }
     }
-    void playerEquipWeaponByWeapon(Weapon weapon)
+    void playerEquipWeaponByWeapon(ref Weapon weapon, bool forceEquip = false)
     {
-        playerEquipWeapon(weapon, weapon.weaponSlot);
+        playerEquipWeapon(ref weapon, weapon.weaponSlot, forceEquip);
         //if (weapon.weapon == WeaponData.weaponList.defaultWeapon && defaultWeaponsEquippable)
         //{
         //    return;
@@ -368,7 +336,7 @@ public class Player : MonoBehaviour
                     break;
                 }
         }
-        playerEquipWeapon(weaponBeingEquipped, weaponSlot);
+        playerEquipWeapon(ref weaponBeingEquipped, weaponSlot);
         //if (weaponBeingEquipped.weapon == WeaponData.weaponList.defaultWeapon && defaultWeaponsEquippable)
         //{
         //    return;
@@ -389,7 +357,7 @@ public class Player : MonoBehaviour
         //    }
         //}
     }
-    void playerEquipWeapon(Weapon weaponBeingEquipped, weaponSlots weaponSlot, bool forceEquip = false)
+    void playerEquipWeapon(ref Weapon weaponBeingEquipped, weaponSlots weaponSlot, bool forceEquip = false)
     {
         if (weaponBeingEquipped.weapon != WeaponData.weaponList.defaultWeapon || defaultWeaponsEquippable || forceEquip)
         {
@@ -409,29 +377,6 @@ public class Player : MonoBehaviour
     }
     void playerEquipSlotScroll(bool up)
     {
-        switch (weaponSlotEquipped)
-        {
-            case weaponSlots.weaponPrimary:
-                break;
-            case weaponSlots.weaponSecondary:
-                break;
-            case weaponSlots.weaponMelee:
-                break;
-            case weaponSlots.weaponEquipment1:
-                break;
-            case weaponSlots.weaponEquipment2:
-                break;
-            case weaponSlots.weaponEquipment3:
-                break;
-            default:
-                break;
-        }
-
-        if (up)
-        {
-
-        }
-
         int slotChange;
         if (up)
         {

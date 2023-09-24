@@ -33,18 +33,16 @@ public class PlayerArmsDrift : MonoBehaviour
     Vector3
         position,
         rotation,
-        walkingAnimVector;
-    [HideInInspector] public StringBuilder
+        walkingAnimVector,
         debugDriftPositionInput,
         debugDriftPositionTarget,
         debugDriftPositionOutput,
-        debugDriftRotationInput,
-        debugDriftRotationTarget,
+        debugDriftRotationTarget;
+    Quaternion
         debugDriftRotationOutput;
-    [HideInInspector] public string
-        debugDriftPositionSpeed,
-        debugDriftRotationSpeed;
     float
+        debugDriftPositionSpeed,
+        debugDriftRotationSpeed,
         walkingAnimX = 0f,
         walkingAnimY = 0f,
         walkingAnimDelayValue;
@@ -55,12 +53,14 @@ public class PlayerArmsDrift : MonoBehaviour
     {
         StartCoroutine(walkingAnim());
     }
-    public void driftkb(Vector3 positionTemp)
+    void Update()
     {
-        debugDriftPositionInput = new StringBuilder()
-            .Append("(").Append(positionTemp.x)
-            .Append(", ").Append(positionTemp.y)
-            .Append(", ").Append(positionTemp.z).Append(")");
+        driftKBaM();
+    }
+    public void driftKBaM()
+    {
+        Vector3 positionTemp = Player.instance.movementDirection;
+        debugDriftPositionInput = positionTemp;
         float
             positionToStateSpeed,
             rotationToStateSpeed;
@@ -132,28 +132,12 @@ public class PlayerArmsDrift : MonoBehaviour
         Camera.main.transform.localPosition = new Vector3(0f, Player.instance.playerCameraHeight, 0f) + (driftPositionOutput * walkingAnimCameraBobMultiplier);
 
         #region debug data gathering
-        debugDriftPositionTarget = new StringBuilder()
-            .Append("(").Append(Math.Round(positionTarget.x, 4))
-            .Append(", ").Append(Math.Round(positionTarget.y, 4))
-            .Append(", ").Append(Math.Round(positionTarget.z, 4)).Append(")");
-
-        debugDriftPositionOutput = new StringBuilder()
-            .Append("(").Append(Math.Round(driftPositionOutput.x, 4))
-            .Append(", ").Append(Math.Round(driftPositionOutput.y, 4))
-            .Append(", ").Append(Math.Round(driftPositionOutput.z, 4)).Append(")");
-
-        debugDriftRotationTarget = new StringBuilder()
-            .Append("(").Append(Math.Round(rotationTarget.x, 4))
-            .Append(", ").Append(Math.Round(rotationTarget.y, 4))
-            .Append(", ").Append(Math.Round(rotationTarget.z, 4)).Append(")");
-
-        debugDriftRotationOutput = new StringBuilder()
-            .Append("(").Append(Math.Round(driftRotationOutput.eulerAngles.x, 4))
-            .Append(", ").Append(Math.Round(driftRotationOutput.eulerAngles.y, 4))
-            .Append(", ").Append(Math.Round(driftRotationOutput.eulerAngles.z, 4)).Append(")");
-
-        debugDriftPositionSpeed = positionToStateSpeed.ToString();
-        debugDriftRotationSpeed = rotationToStateSpeed.ToString();
+        debugDriftPositionTarget = positionTarget;
+        debugDriftPositionOutput = driftPositionOutput;
+        debugDriftRotationTarget = rotationTarget;
+        debugDriftRotationOutput = driftRotationOutput;
+        debugDriftPositionSpeed = positionToStateSpeed;
+        debugDriftRotationSpeed = rotationToStateSpeed;
         #endregion
     }
     IEnumerator walkingAnim()
@@ -183,5 +167,35 @@ public class PlayerArmsDrift : MonoBehaviour
             }
             yield return new WaitForEndOfFrame();
         }
+    }
+    public StringBuilder playerArmsDriftDebug()
+    {
+        Vector3 debugDriftRotationOutputEuler = debugDriftRotationOutput.eulerAngles;
+        return new StringBuilder()
+            .Append("driftPosition;")
+            .Append("\n    Input: ")
+            .Append("(").Append(Math.Round(debugDriftPositionInput.x, 4))
+            .Append(", ").Append(Math.Round(debugDriftPositionInput.y, 4))
+            .Append(", ").Append(Math.Round(debugDriftPositionInput.z, 4)).Append(")")
+            .Append("\n    Target: ")
+            .Append("(").Append(Math.Round(debugDriftPositionTarget.x, 4))
+            .Append(", ").Append(Math.Round(debugDriftPositionTarget.y, 4))
+            .Append(", ").Append(Math.Round(debugDriftPositionTarget.z, 4)).Append(")")
+            .Append("\n    Output: ")
+            .Append("(").Append(Math.Round(debugDriftPositionOutput.x, 4))
+            .Append(", ").Append(Math.Round(debugDriftPositionOutput.y, 4))
+            .Append(", ").Append(Math.Round(debugDriftPositionOutput.z, 4)).Append(")")
+            .Append("\n    Speed: ").Append(debugDriftPositionSpeed)
+
+            .Append("\ndriftRotation;")
+            .Append("\n    Target: ")
+            .Append("(").Append(Math.Round(debugDriftRotationTarget.x, 4))
+            .Append(", ").Append(Math.Round(debugDriftRotationTarget.y, 4))
+            .Append(", ").Append(Math.Round(debugDriftRotationTarget.z, 4)).Append(")")
+            .Append("\n    Output: ")
+            .Append("(").Append(Math.Round(debugDriftRotationOutputEuler.x, 4))
+            .Append(", ").Append(Math.Round(debugDriftRotationOutputEuler.y, 4))
+            .Append(", ").Append(Math.Round(debugDriftRotationOutputEuler.z, 4)).Append(")")
+            .Append("\n    Speed: ").Append(debugDriftRotationSpeed);
     }
 }

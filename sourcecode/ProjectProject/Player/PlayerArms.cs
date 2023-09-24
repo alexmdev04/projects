@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 
 public class PlayerArms : MonoBehaviour
@@ -25,7 +26,6 @@ public class PlayerArms : MonoBehaviour
     void Update()
     {
         gameClock += Time.deltaTime;
-        playerArmsDrift.driftkb(Player.instance.movementDirection);
         pnVector = Vector3.Lerp(pnVector, Vector3.zero, Time.deltaTime * Player.instance.weaponRecoverySpeed);
     }
     public void playerArmsAnimate(string animation, WeaponData.weaponList weapon = WeaponData.weaponList.defaultWeapon)
@@ -47,5 +47,11 @@ public class PlayerArms : MonoBehaviour
         pnVector = Vector3.Scale(new Vector3(pn1 * pnPosNegOutput1, pn2 * pnPosNegOutput2, 0), pnScale);
         transform.localEulerAngles += pnVector;
         //Debug.Log(pnVector);
+    }
+    public StringBuilder playerArmsDebug()
+    {
+        return new StringBuilder()
+            .Append("<u>playerArms;</u>\n")
+            .Append(playerArmsDrift.playerArmsDriftDebug());
     }
 }

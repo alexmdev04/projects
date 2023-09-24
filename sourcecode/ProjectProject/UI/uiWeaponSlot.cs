@@ -14,7 +14,7 @@ public class uiWeaponSlot : MonoBehaviour
     InputAction uiWeaponSlotBinding;
     bool uiWeaponSlotIconLoaded;
 
-    void Update()
+    void FixedUpdate()
     {
         switch (weaponSlot)
         {
@@ -75,14 +75,14 @@ public class uiWeaponSlot : MonoBehaviour
                 if (weapon.weapon != WeaponData.weaponList.defaultWeapon)
                 {
                     AsyncOperationHandle<Sprite> weaponSprite = Addressables.LoadAssetAsync<Sprite>("Assets/Textures/Weapon Icons/" + weapon.weaponNameInternal + "_Icon.png");
-                    Debug.Log("async started");
+                    //Debug.Log("async started");
                     uiWeaponSlotIconLoaded = false;
-                    weaponSprite.Completed += delegate { uiWeaponSlotLoadIconCompleted(weaponSprite); };
+                    weaponSprite.Completed += delegate { uiWeaponSlotLoadIconCompleted(ref weaponSprite); };
                 }
             }
         }
     }
-    void uiWeaponSlotLoadIconCompleted(AsyncOperationHandle<Sprite> weaponSprite)
+    void uiWeaponSlotLoadIconCompleted(ref AsyncOperationHandle<Sprite> weaponSprite)
     {
         if (weaponSprite.Status == AsyncOperationStatus.Succeeded)
         {

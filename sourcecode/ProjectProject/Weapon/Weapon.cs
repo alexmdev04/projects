@@ -60,7 +60,7 @@ public class Weapon : MonoBehaviour
     GameObject
         weaponModel;
     float
-        weaponFireRateElasped;
+        weaponFireRateElapsed;
     bool
         weaponShootHeld;
     void Awake()
@@ -81,15 +81,12 @@ public class Weapon : MonoBehaviour
             //weaponAnimate(weaponOriginAnim);
             PlayerArms.instance.playerArmsAnimate(weaponOriginAnim, weapon);
         }
-        if (weaponFireRateElasped > 0) { weaponFireRateElasped -= Time.deltaTime; }
+        if (weaponFireRateElapsed > 0) { weaponFireRateElapsed -= Time.deltaTime; }
         if (Input.GetKeyDown(KeyCode.R)) { weaponReload(); }
     }
     void LateUpdate()
     {
-        if (weaponFireType == WeaponData.weaponFireTypes.semiAuto || 
-            weaponFireType == WeaponData.weaponFireTypes.burst ||
-            weaponFireType == WeaponData.weaponFireTypes.boltAction) 
-            weaponShootHeld = Player.instance.input.Player.Shoot.IsPressed();
+        weaponShootHeld = Player.instance.input.Player.Shoot.IsPressed();
     }
     public void weaponShoot()
     {
@@ -99,64 +96,59 @@ public class Weapon : MonoBehaviour
             {
                 case WeaponData.weaponFireTypes.semiAuto:
                     {
-                        if (weaponFireRateElasped > 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            if (weaponShootHeld)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                if (weaponAmmoCheck()) { weaponShootPassed(); }
-                                weaponFireRateElasped = weaponFireRate;
-                                break;
-                            }
-                        }
+                        if (weaponFireRateElapsed > 0) { break; }
+                        if (weaponShootHeld) { break; }
+                        if (weaponAmmoCheck()) { weaponShootPassed(); }
+                        weaponFireRateElapsed = weaponFireRate;
+                        break;
                     }
                 case WeaponData.weaponFireTypes.fullAuto:
                     {
-                        if (weaponFireRateElasped > 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            if (weaponAmmoCheck()) { weaponShootPassed(); }
-                            weaponFireRateElasped = weaponFireRate;
-                            break;
-                        }
+                        if (weaponFireRateElapsed > 0) { break; }
+                        if (weaponAmmoCheck()) { weaponShootPassed(); }
+                        weaponFireRateElapsed = weaponFireRate;
+                        break;
+
                     }
                 case WeaponData.weaponFireTypes.burst:
                     {
-                        Debug.LogError("Fire type weaponFireTypes.burst not implemented");
+                        weaponFireTypeTemp(weaponFireType);
                         break;
                     }
                 case WeaponData.weaponFireTypes.boltAction:
                     {
-                        Debug.LogError("Fire type weaponFireTypes.boltAction not implemented");
+                        weaponFireTypeTemp(weaponFireType);
                         break;
                     }
                 case WeaponData.weaponFireTypes.melee:
                     {
-                        Debug.LogError("Fire type weaponFireTypes.melee not implemented");
+                        weaponFireTypeTemp(weaponFireType);
                         break;
                     }
                 case WeaponData.weaponFireTypes.equipment:
                     {
-                        Debug.LogError("Fire type weaponFireTypes.equipment not implemented");
+                        weaponFireTypeTemp(weaponFireType);
                         break;
                     }
             }
             //weaponAnimate(weaponShootAnim);
         }
     }
+    void weaponFireTypeTemp(WeaponData.weaponFireTypes weaponFireTypes)
+    { // placeholder for not implemented fireTypes that just acts like semiAuto, prevents console error spam and verifies the weapon is working
+        if (weaponFireRateElapsed > 0) { return; }
+        if (weaponShootHeld) { return; }
+        if (weaponAmmoCheck())
+        {
+            Debug.LogError("Fire type weaponFireTypes." + weaponFireTypes + " not implemented, using semiAuto");
+            weaponShootPassed();
+        }
+        weaponFireRateElapsed = weaponFireRate;
+        return;
+    }
     void weaponShootPassed()
     {
-        weaponFireRateElasped = 0f;
+        weaponFireRateElapsed = 0f;
         weaponSound(weaponShootSound, "weaponShootSound");
         PlayerArms.instance.playerArmsAnimate(weaponShootAnim, weapon);
         PlayerArms.instance.playerArmsPNShootRecoil();
@@ -184,7 +176,7 @@ public class Weapon : MonoBehaviour
     {
         weaponEquipped = false;
         weaponEquipFinished = false;
-        weaponFireRateElasped = 0f;
+        weaponFireRateElapsed = 0f;
         
     }
     public void setWeapon
@@ -274,31 +266,34 @@ public class Weapon : MonoBehaviour
         //weaponAnimation.AddClip(shootAnim, weaponShootAnim);
         //weaponAnimation.AddClip(reloadAnim, weaponReloadAnim);
     }
-    public StringBuilder getWeaponDebugStats()
+    public StringBuilder weaponDebug()
     { // i swear it makes a performance difference
-        StringBuilder sb = new StringBuilder();
-        sb.Append("name: ").Append(Enum.GetName(weapon.GetType(), weapon)).Append("\n");
-        sb.Append("type: ").Append(Enum.GetName(weaponType.GetType(), weaponType)).Append("\n");
-        sb.Append("originPosition: (").Append(weaponOriginPosition.x).Append(", ").Append(weaponOriginPosition.y).Append(", ").Append(weaponOriginPosition.z).Append(")\n");
-        sb.Append("originRotation: (").Append(weaponOriginRotation.x).Append(", ").Append(weaponOriginRotation.y).Append(", ").Append(weaponOriginRotation.z).Append(")\n");
-        sb.Append("variant: ").Append(weaponVariant).Append("\n");
-        sb.Append("camo: ").Append(weaponCamo).Append("\n");
-        sb.Append("damage: ").Append(weaponDamage).Append(" x ").Append(weaponDamageMultiplier).Append(" = ").Append(weaponDamage * weaponDamageMultiplier).Append("\n");
-        sb.Append("fireRate: ").Append(weaponFireRate).Append(" x ").Append(weaponFireRateMultiplier).Append(" = ").Append(weaponFireRate * weaponFireRateMultiplier).Append("\n");
-        sb.Append("fireRateElapsed: ").Append(weaponFireRateElasped).Append("\n");
-        sb.Append("equipTime: ").Append(weaponEquipTime).Append("s x ").Append(weaponEquipTimeMultiplier).Append(" = ").Append(weaponEquipTime * weaponEquipTimeMultiplier).Append("\n");
-        sb.Append("aimTime: ").Append(weaponAimTime).Append("s x ").Append(weaponAimTimeMultiplier).Append(" = ").Append(weaponAimTime * weaponAimTimeMultiplier).Append("\n");
-        sb.Append("reloadTime: ").Append(weaponReloadTime).Append("s x ").Append(weaponReloadTimeMultiplier).Append(" = ").Append(weaponReloadTime * weaponReloadTimeMultiplier).Append("\n");
-        //sb.Append("recoverySpeed: ").Append(weaponRecoverySpeed).Append("\n");
-        sb.Append("weight: ").Append(weaponWeight);
-        return sb;
+        return new StringBuilder()
+            .Append("<u>weapon;</u>\n")
+            .Append("slot: ").Append(Enum.GetName(weaponSlot.GetType(), weaponSlot)).Append("\n")
+            .Append("name: ").Append(Enum.GetName(weapon.GetType(), weapon)).Append("\n")
+            .Append("type: ").Append(Enum.GetName(weaponType.GetType(), weaponType)).Append("\n")
+            .Append("fireType: ").Append(Enum.GetName(weaponFireType.GetType(), weaponFireType)).Append("\n")
+            .Append("originPosition: (").Append(weaponOriginPosition.x).Append(", ").Append(weaponOriginPosition.y).Append(", ").Append(weaponOriginPosition.z).Append(")\n")
+            .Append("originRotation: (").Append(weaponOriginRotation.x).Append(", ").Append(weaponOriginRotation.y).Append(", ").Append(weaponOriginRotation.z).Append(")\n")
+            .Append("variant: ").Append(weaponVariant).Append("\n")
+            .Append("camo: ").Append(weaponCamo).Append("\n")
+            .Append("damage: ").Append(weaponDamage).Append(" x ").Append(weaponDamageMultiplier).Append(" = ").Append(weaponDamage * weaponDamageMultiplier).Append("\n")
+            .Append("fireRate: ").Append(weaponFireRate).Append(" x ").Append(weaponFireRateMultiplier).Append(" = ").Append(weaponFireRate * weaponFireRateMultiplier).Append("\n")
+            .Append("fireRateElapsed: ").Append(weaponFireRateElapsed).Append("\n")
+            .Append("equipTime: ").Append(weaponEquipTime).Append("s x ").Append(weaponEquipTimeMultiplier).Append(" = ").Append(weaponEquipTime * weaponEquipTimeMultiplier).Append("\n")
+            .Append("aimTime: ").Append(weaponAimTime).Append("s x ").Append(weaponAimTimeMultiplier).Append(" = ").Append(weaponAimTime * weaponAimTimeMultiplier).Append("\n")
+            .Append("reloadTime: ").Append(weaponReloadTime).Append("s x ").Append(weaponReloadTimeMultiplier).Append(" = ").Append(weaponReloadTime * weaponReloadTimeMultiplier).Append("\n")
+            .Append("recoverySpeed: ").Append(weaponRecoverySpeed).Append("\n")
+            .Append("ammoMagMax: ").Append(weaponAmmoMagMax).Append("\n")
+            .Append("ammoMagCurrent: ").Append(weaponAmmoMagCurrent).Append("\n")
+            .Append("ammoStock: ").Append(weaponAmmoStock).Append("\n")
+            .Append("weight: ").Append(weaponWeight).Append("\n")
+            .Append("burstAmount: ").Append(weaponBurstAmount).Append("\n");
     }
     void weaponSound(AudioSource sound, string soundNameDebug = "sound")
     {
-        if (weapon == WeaponData.weaponList.defaultWeapon)
-        {
-            return;
-        }
+        if (weapon == WeaponData.weaponList.defaultWeapon) { return; }
         try
         {
             sound.PlayOneShot(sound.clip);

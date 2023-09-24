@@ -16,4 +16,14 @@ public static class Extensions
             SetChildLayers(child, layer);
         }
     }
+    public static string getDebugNote(this string _this, string[] input, GameObject gameObject)
+    {
+        if (input.Length != 0)
+        {
+            _this += "---- " + gameObject.name + " ----\n";
+            foreach (string _string in input) { _this += _string + "\n"; }
+            return _this;
+        }
+        return "";
+    }
 }
