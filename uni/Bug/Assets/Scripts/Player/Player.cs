@@ -32,7 +32,7 @@ public class Player : MonoBehaviour
         Application.targetFrameRate = targetFramerate;
         lineRenderer.SetPosition(0, refTransform.transform.position += lineRendererOffset);
         refTransform.transform.position = transform.position;
-        refTransform.transform.eulerAngles = new (Camera.main.transform.localEulerAngles.x, transform.localEulerAngles.y, 0);
+        refTransform.transform.eulerAngles = new(Camera.main.transform.eulerAngles.x, transform.eulerAngles.y, 0);
     }
     void LateUpdate()
     {
@@ -54,7 +54,7 @@ public class Player : MonoBehaviour
         mouseRotation *= mouseRotationMultiplier * lookSensitivity;
         lookRotY += mouseRotation.x * Time.fixedDeltaTime;
         lookRotX -= mouseRotation.y * Time.fixedDeltaTime;
-        lookRotX = Mathf.Clamp(lookRotX, -90, 90);
+        lookRotX = Mathf.Clamp(lookRotX, -90f, 90f);
         transform.localEulerAngles = new(0, lookRotY, 0);
         Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
     }
