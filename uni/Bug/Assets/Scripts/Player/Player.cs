@@ -23,6 +23,7 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         lineRenderer = GetComponent<LineRenderer>();
+        Debug.developerConsoleEnabled = true;
     }
     void Start()
     {
@@ -33,6 +34,7 @@ public class Player : MonoBehaviour
         lineRenderer.SetPosition(0, refTransform.transform.position += lineRendererOffset);
         refTransform.transform.position = transform.position;
         refTransform.transform.eulerAngles = new(Camera.main.transform.eulerAngles.x, transform.eulerAngles.y, 0);
+        if (Input.GetKeyDown(KeyCode.Tilde)) { Debug.developerConsoleVisible = !Debug.developerConsoleVisible; }
     }
     void LateUpdate()
     {
@@ -57,5 +59,11 @@ public class Player : MonoBehaviour
         lookRotX = Mathf.Clamp(lookRotX, -90f, 90f);
         transform.localEulerAngles = new(0, lookRotY, 0);
         Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
+    }
+    public void playerLookHookComplete(Vector3 newDirection)
+    {
+        refTransform.transform.forward = newDirection;
+        lookRotX = refTransform.transform.localEulerAngles.x;
+        lookRotY = refTransform.transform.localEulerAngles.y;
     }
 }
