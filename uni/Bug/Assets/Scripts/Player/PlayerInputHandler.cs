@@ -22,6 +22,6 @@ public class PlayerInputHandler : MonoBehaviour
         if (input.Player.Hook.IsPressed()) { PlayerHook.instance.playerHookHeld(); }
         if (input.Player.Hook.WasReleasedThisFrame()) { PlayerHook.instance.playerHookReleased(); }
         Player.instance.mouseRotation = input.Player.Look.ReadValue<Vector2>();
-        PlayerHook.instance.distanceFromPoint += Input.mouseScrollDelta.y;
+        //PlayerHook.instance.distanceFromPoint += Input.mouseScrollDelta.y;
     }
 }
