@@ -26,4 +26,8 @@ public static class Extensions
         }
         return "";
     }
+    public static Quaternion ReflectRotation(this Quaternion source, Vector3 normal)
+    {
+        return Quaternion.LookRotation(Vector3.Reflect(source * Vector3.forward, normal), Vector3.Reflect(source * Vector3.up, normal));
+    }
 }

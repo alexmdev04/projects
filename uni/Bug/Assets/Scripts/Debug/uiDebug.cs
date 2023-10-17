@@ -14,14 +14,13 @@ public class uiDebug : MonoBehaviour
         uiRes,
         uiTodo,
         uiNotes,
-        uiPlayerStats,
+        uiHookStats,
         uiVersion;
     public GameObject ui, uiDebugGroup;
     public bool showAllNotes;
+    public bool debugMode;
     int deviceFps;
     bool fpsWait;
-    //string timePlayedSavedStr = "0s";
-    //string timePlayedCurrentStr = "0s";
     void Awake()
     {
         instance = this;
@@ -29,17 +28,16 @@ public class uiDebug : MonoBehaviour
     }
     void Start()
     {
-        //menuHandler.menuChanged.AddListener(menuChanged);
         InvokeRepeating(nameof(getRes), 0f, 1f);
-        //InvokeRepeating(nameof(getTimePlayed), 0f, 1f);
-        //InvokeRepeating(nameof(getDebugNotes), 0f, 1f);
         InvokeRepeating(nameof(getFPS), 0f, 0.2f);
     }
     void Update()
     {
-        //getStats();
+        if (Input.GetKeyDown(KeyCode.F3)) { debugMode = !debugMode; }
         if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
+        getHookStats();
     }
+
     void getRes()
     {
         var gcd = calcGCD(Screen.width, Screen.height);
@@ -51,11 +49,26 @@ public class uiDebug : MonoBehaviour
     {
         uiFPS.text = ((int)(1 / Time.unscaledDeltaTime)).ToString();
     }
-    // void getTimePlayed() // seperated from getStats to reduce overhead
-    // {
-    //     timePlayedCurrentStr = convertTime(gameHandler.instance.timePlayedSec);
-    //     timePlayedSavedStr = convertTime(fileHandler.timePlayedSec);
-    // }
+    void getHookStats()
+    {
+        uiHookStats.text = new StringBuilder()
+            .Append("<u>hookStats;</u>")
+            .Append("\nvalidLocation = ").Append(PlayerHook.instance.playerHookValidLocation)
+            .Append("\noverlapSphere;\n  collisions = ").Append((PlayerHook.instance.playerHookPointCheck != null) ? PlayerHook.instance.playerHookPointCheck.Length : 0)
+            .Append(getHookPointCollisions())
+            .Append("\ntargetPosition = ").Append(PlayerHook.instance.debugTargetPosition.x).Append(", ").Append(PlayerHook.instance.debugTargetPosition.y).Append(", ").Append(PlayerHook.instance.debugTargetPosition.z).Append(")")
+            .Append("\ntargetRotation = ").Append(PlayerHook.instance.debugTargetRotation.x).Append(", ").Append(PlayerHook.instance.debugTargetRotation.y).Append(", ").Append(PlayerHook.instance.debugTargetRotation.z).Append(")")
+            .Append("\ndistanceToTargetPosition = ").Append(PlayerHook.instance.debugDistanceToTargetPosition)
+            .ToString();
+    }
+    StringBuilder getHookPointCollisions()
+    {
+        StringBuilder a = new StringBuilder("\n  names = ");
+        if (PlayerHook.instance.playerHookPointCheck == null) { return a.Append("n/a"); }
+        if (PlayerHook.instance.playerHookPointCheck.Length == 0) { return a.Append("n/a"); }
+        foreach (Collider collider in PlayerHook.instance.playerHookPointCheck) { a.Append(collider.gameObject.name).Append(", "); }
+        return a;
+    }
     void getDebugNotes()
     {
         List<uiDebugNote> notes = ui.GetComponentsInChildren<uiDebugNote>().ToList();

@@ -5,68 +5,90 @@ using UnityEngine;
 public class PlayerHook : MonoBehaviour
 {
     public static PlayerHook instance {  get; private set; }
-    public float hookMaxDistance = 500f, distanceFromWall = 0.1f;
+    public float 
+        playerHookMaxDistance = 500f, 
+        playerHookDistanceFromWall = 0.1f,
+        playerHookMoveSpeed = 1f,
+        playerHookRotateSpeed = 1f;
+    public bool playerHookRotate;
+    public bool playerHookValidLocation { get; private set; }
+    public bool playerHookMoving { get; private set; }
+    public Collider[] playerHookPointCheck { get; private set; }
+    [SerializeField] GameObject playerHookPoint, testCube1;
+    [SerializeField] LayerMask layerMask = ~(1 << 2);
 
     float playerRadius;
-    int layerMask = ~(1 << 2);
     Vector3 playerDimensions = Vector3.one;
     RaycastHit hit1, hit2;
-    bool validLocation;
+    MeshRenderer playerHookPointRenderer;
 
-    [SerializeField] GameObject hit1Pos, targetPos, finalPos;
+    public Vector3 debugTargetPosition { get; private set; }
+    public Vector3 debugTargetRotation { get; private set; }
+    public float debugDistanceToTargetPosition { get; private set; }
+
 
     void Awake()
     {
         instance = this;
+        playerHookPointRenderer = playerHookPoint.GetComponent<MeshRenderer>();
         playerRadius = playerDimensions.x / 2f;
-    }
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
     }
     public void playerHookHeld()
     {
-        targetPos.SetActive(!validLocation);
-        finalPos.SetActive(validLocation);
+        if (playerHookMoving) { return; }
 
-        if (Physics.Raycast(Player.instance.refTransform.transform.position, Player.instance.refTransform.transform.TransformDirection(Vector3.forward), out hit1, hookMaxDistance))
+        playerHookPoint.SetActive(true);
+        playerHookPointRenderer.material.SetColor("_fresnelColor", playerHookValidLocation ? Color.green : Color.red);
+
+        if (Physics.Raycast(Player.instance.transform.position, Player.instance.transform.TransformDirection(Vector3.forward), out hit1, playerHookMaxDistance, layerMask))
         {
-            hit1Pos.transform.position = hit1.point;
-
-            Vector3 targetPosition = hit1.point + hit1.normal * (playerRadius + distanceFromWall); // clipping prevention
-            targetPos.transform.position = targetPosition;
-
-            Collider[] sphere = Physics.OverlapSphere(targetPosition, playerRadius + distanceFromWall, layerMask);
-            if (sphere.Length > 1)
-            {
-                //string obstructingObjNames = "";
-                //foreach (Collider obstructingObj in sphere) { obstructingObjNames += obstructingObj.gameObject.name + ", "; }
-                //Debug.Log("obstruction = " + obstructingObjNames);
-                validLocation = false;
-            }
-            else
-            {
-                validLocation = true;
-                finalPos.transform.position = targetPosition;
-            }
+            Vector3 targetPosition = hit1.point + hit1.normal * (playerRadius + playerHookDistanceFromWall);
+            playerHookPointCheck = Physics.OverlapSphere(targetPosition, playerRadius + playerHookDistanceFromWall + 0.01f, layerMask);
+			playerHookValidLocation = !(playerHookPointCheck.Length > 1);
+	        playerHookPoint.transform.position = targetPosition;
+            debugTargetPosition = targetPosition;
+            if (uiDebug.instance.debugMode)
+			{
+				Debug.DrawLine(Player.instance.transform.position + Player.instance.lineRendererOffset, hit1.point, Color.cyan);
+				Popcron.Gizmos.Sphere(targetPosition, playerRadius + playerHookDistanceFromWall + 0.01f, Color.cyan);
+                Debug.DrawRay(hit1.point, hit1.normal);
+			}
+        }
+        else
+        {
+            playerHookPoint.transform.position = Player.instance.transform.position + Player.instance.transform.TransformDirection(Vector3.forward) * playerHookMaxDistance;
+            playerHookValidLocation = false;
+            playerHookPointRenderer.material.SetColor("_fresnelColor", Color.red); ;
         }
     }
-
     public void playerHookReleased()
     {
-        if (validLocation && Physics.Raycast(Player.instance.refTransform.transform.position, Player.instance.refTransform.transform.TransformDirection(Vector3.forward), out hit2))
+        if (playerHookMoving) { return; }
+        playerHookPoint.SetActive(false);
+        if (playerHookValidLocation && Physics.Raycast(Player.instance.transform.position, Player.instance.transform.TransformDirection(Vector3.forward), out hit2))
         {
-            transform.position = hit2.point + hit1.normal * playerRadius;
-            Player.instance.playerLookHookComplete(Vector3.Reflect(transform.forward, hit2.normal));
+            // lerp to pos
+            playerHookMoving = true;
+            Quaternion targetRotation = Player.instance.transform.rotation.ReflectRotation(hit1.normal);
+            Vector3 targetPosition = hit2.point + hit1.normal * playerRadius;
+            debugTargetPosition = targetPosition;
+            debugTargetRotation = targetRotation.eulerAngles;
+            StartCoroutine(playerHookMove(targetPosition, targetRotation));
         }
     }
-    public void playerHookFinished()
+    public IEnumerator playerHookMove(Vector3 targetPosition, Quaternion targetRotation)
     {
-
+        testCube1.transform.position = targetPosition;
+        do
+        {
+            Player.instance.transform.position = Vector3.MoveTowards(Player.instance.transform.position, targetPosition, Time.deltaTime * playerHookMoveSpeed);
+            if (playerHookRotate) { Player.instance.playerLookSet(Quaternion.Lerp(Player.instance.transform.rotation, targetRotation, Time.deltaTime * playerHookRotateSpeed).eulerAngles); }
+            debugDistanceToTargetPosition = Vector3.Distance(Player.instance.transform.position, targetPosition);
+            yield return new WaitForEndOfFrame();
+        }
+        while (Vector3.Distance(Player.instance.transform.position, targetPosition) > 0f);
+        Player.instance.transform.position = targetPosition;
+        if (playerHookRotate) { Player.instance.playerLookSet(targetRotation.eulerAngles); }
+        playerHookMoving = false;
     }
 }
