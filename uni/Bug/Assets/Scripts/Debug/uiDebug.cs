@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
+using Unity.Collections;
 using UnityEngine;
 
 public class uiDebug : MonoBehaviour
@@ -18,50 +19,55 @@ public class uiDebug : MonoBehaviour
         uiVersion;
     public GameObject ui, uiDebugGroup;
     public bool showAllNotes;
-    public bool debugMode;
+    public bool debugMode { get; private set; }
     int deviceFps;
     bool fpsWait;
     void Awake()
     {
         instance = this;
         uiVersion.text = "v" + Application.version;
+
+        #if UNITY_EDITOR
+        debugMode = true;
+        #endif
     }
     void Start()
     {
-        InvokeRepeating(nameof(getRes), 0f, 1f);
-        InvokeRepeating(nameof(getFPS), 0f, 0.2f);
+        InvokeRepeating(nameof(GetRes), 0f, 1f);
+        InvokeRepeating(nameof(GetFPS), 0f, 0.2f);
     }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.F3)) { debugMode = !debugMode; }
+        uiDebugGroup.SetActive(debugMode);
         if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
-        getHookStats();
+        if (debugMode) { GetHookStats(); }
     }
 
-    void getRes()
+    void GetRes()
     {
-        var gcd = calcGCD(Screen.width, Screen.height);
+        var gcd = Extensions.CalcGCD(Screen.width, Screen.height);
         uiRes.text = Screen.width.ToString() + "x" + Screen.height.ToString() + "\n" 
             + Screen.currentResolution.refreshRateRatio + "Hz" + "\n" +
             (string.Format("{0}:{1}", Screen.width / gcd, Screen.height / gcd));
     }
-    void getFPS()
+    void GetFPS()
     {
         uiFPS.text = ((int)(1 / Time.unscaledDeltaTime)).ToString();
     }
-    void getHookStats()
+    void GetHookStats()
     {
         uiHookStats.text = new StringBuilder()
             .Append("<u>hookStats;</u>")
             .Append("\nvalidLocation = ").Append(PlayerHook.instance.playerHookValidLocation)
             .Append("\noverlapSphere;\n  collisions = ").Append((PlayerHook.instance.playerHookPointCheck != null) ? PlayerHook.instance.playerHookPointCheck.Length : 0)
-            .Append(getHookPointCollisions())
+            .Append(GetHookPointCollisions())
             .Append("\ntargetPosition = ").Append(PlayerHook.instance.debugTargetPosition.x).Append(", ").Append(PlayerHook.instance.debugTargetPosition.y).Append(", ").Append(PlayerHook.instance.debugTargetPosition.z).Append(")")
             .Append("\ntargetRotation = ").Append(PlayerHook.instance.debugTargetRotation.x).Append(", ").Append(PlayerHook.instance.debugTargetRotation.y).Append(", ").Append(PlayerHook.instance.debugTargetRotation.z).Append(")")
             .Append("\ndistanceToTargetPosition = ").Append(PlayerHook.instance.debugDistanceToTargetPosition)
             .ToString();
     }
-    StringBuilder getHookPointCollisions()
+    StringBuilder GetHookPointCollisions()
     {
         StringBuilder a = new StringBuilder("\n  names = ");
         if (PlayerHook.instance.playerHookPointCheck == null) { return a.Append("n/a"); }
@@ -69,7 +75,7 @@ public class uiDebug : MonoBehaviour
         foreach (Collider collider in PlayerHook.instance.playerHookPointCheck) { a.Append(collider.gameObject.name).Append(", "); }
         return a;
     }
-    void getDebugNotes()
+    void GetDebugNotes()
     {
         List<uiDebugNote> notes = ui.GetComponentsInChildren<uiDebugNote>().ToList();
         uiNotes.text = "notes:";
@@ -83,49 +89,5 @@ public class uiDebug : MonoBehaviour
                 uiTodo.text += "\n" + note.toDo; 
             }
         }
-    }
-    /// <summary>
-    /// Converts a time given in seconds to days, hours, minutes and seconds (e.g. 1d 19h 35m 7s)
-    /// </summary>
-    /// <param name="seconds"></param>
-    /// <returns></returns>
-    public static string convertTime(float seconds)
-    {
-        TimeSpan ts = TimeSpan.FromSeconds((int)seconds);
-
-        if (ts.Days > 0)
-        //{ return ts.Days + "d " + ts.Hours + "h " + ts.Minutes + "m " + ts.Seconds + "s"; }
-        { return string.Format("{0}d {1}h {2}m {3}s ", ts.Days, ts.Hours, ts.Minutes, ts.Seconds); }
-
-        else if (ts.Hours > 0)
-        //{ return ts.Hours + "h " + ts.Minutes + "m " + ts.Seconds + "s"; }
-        { return string.Format("{0}h {1}m {2}s ", ts.Hours, ts.Minutes, ts.Seconds); }
-
-        else if (ts.Minutes > 0)
-        //{ return ts.Minutes + "m " + ts.Seconds + "s"; }
-        { return string.Format("{0}m {1}s ", ts.Minutes, ts.Seconds); }
-
-        else //{ return ts.Seconds + "s"; }
-        { return string.Format("{0}s ", ts.Seconds); }
-    }
-    /// <summary>
-    /// Calculates the greatest common denominator of a and b
-    /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public float calcGCD(float a, float b)
-    {
-        while (a != 0f && b != 0f)
-        {
-            if (a > b)
-                a %= b;
-            else
-                b %= a;
-        }
-        if (a == 0f)
-            return b;
-        else
-            return a;
     }
 }

@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
         mouseRotation,
         mouseRotationMultiplier,
         lookSensitivity;
-    public GameObject refTransform;
+    public GameObject refTransform, worksheetObj;
     public Transform transformCalculator;
     public LineRenderer lineRenderer { get; private set; }
     public Vector3 
@@ -36,15 +36,17 @@ public class Player : MonoBehaviour
     void Update()
     {
         Application.targetFrameRate = targetFramerate;
+        lineRenderer.textureScale = new Vector2(lineRenderer.positionCount, 1);
         //lineRenderer.SetPosition(0, refTransform.transform.position += lineRendererOffset);
         //refTransform.transform.position = transform.position;
         //refTransform.transform.eulerAngles = new(Camera.main.transform.eulerAngles.x, transform.eulerAngles.y, 0);
         if (Input.GetKeyDown(KeyCode.Tilde)) { Debug.developerConsoleVisible = !Debug.developerConsoleVisible; }
-        playerMove();
+        if (Input.GetKeyDown(KeyCode.L)) { worksheetObj.SetActive(!worksheetObj.activeSelf); }
+        PlayerMove();
     }
     void LateUpdate()
     {
-        playerLook();
+        PlayerLook();
     }
     void FixedUpdate()
     {
@@ -57,7 +59,7 @@ public class Player : MonoBehaviour
             targetFramerate -= 1;
         }
     }
-    void playerLook()
+    void PlayerLook()
     {
         if (PlayerHook.instance.playerHookMoving) { return; }
         mouseRotation *= mouseRotationMultiplier * lookSensitivity;
@@ -67,12 +69,12 @@ public class Player : MonoBehaviour
         transform.eulerAngles = new(lookRotX, lookRotY, 0);
         //Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
     }
-    public void playerLookSet(Vector3 eulerAngles) 
+    public void PlayerLookSet(Vector3 eulerAngles) 
     {
         lookRotX = eulerAngles.x;
         lookRotY = eulerAngles.y;
     }
-	void playerMove()
+	void PlayerMove()
     {
 		transform.position += movementSpeed * Time.deltaTime * transform.TransformDirection(movementDirection);
 	}
