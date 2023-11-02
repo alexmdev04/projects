@@ -6,7 +6,7 @@
             "id": "22766b49-4a2b-4a99-a5b8-910bfe626f1b",
             "actions": [
                 {
-                    "name": "Hook",
+                    "name": "Grapple",
                     "type": "Button",
                     "id": "c23cacab-4891-48ba-8637-491b6816315f",
                     "expectedControlType": "Button",
@@ -41,7 +41,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Hook",
+                    "action": "Grapple",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

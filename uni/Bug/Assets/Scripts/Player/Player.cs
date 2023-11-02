@@ -4,23 +4,28 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // this script controls everything about the player e.g. position, state, look, interact.
+
+    // instancing
     public static Player instance { get; private set; }
-    public int targetFramerate;
+    public LineRenderer lineRenderer {  get; private set; }
+
+    public int 
+        targetFramerate;
     float 
-        lookRotX,
+        lookRotX, 
         lookRotY;
-    public Vector3 testVector;
     public Vector2 
         mouseRotation,
         mouseRotationMultiplier,
         lookSensitivity;
-    public GameObject refTransform, worksheetObj;
-    public Transform transformCalculator;
-    public LineRenderer lineRenderer { get; private set; }
+    public GameObject 
+        worksheetObj;
     public Vector3 
         lineRendererOffset = new Vector3(0f, -0.1f, 0f),
-        movementDirection;
-    public float movementSpeed = 5f;
+        playerDimensions = Vector3.one;
+    public float playerRadius;
+
     void Awake()
     {
         instance = this;
@@ -29,24 +34,22 @@ public class Player : MonoBehaviour
         Cursor.visible = false;
         lineRenderer = GetComponent<LineRenderer>();
         Debug.developerConsoleEnabled = true;
+        playerRadius = playerDimensions.x / 2f;
     }
     void Start()
     {
+
     }
     void Update()
     {
         Application.targetFrameRate = targetFramerate;
         lineRenderer.textureScale = new Vector2(lineRenderer.positionCount, 1);
-        //lineRenderer.SetPosition(0, refTransform.transform.position += lineRendererOffset);
-        //refTransform.transform.position = transform.position;
-        //refTransform.transform.eulerAngles = new(Camera.main.transform.eulerAngles.x, transform.eulerAngles.y, 0);
         if (Input.GetKeyDown(KeyCode.Tilde)) { Debug.developerConsoleVisible = !Debug.developerConsoleVisible; }
         if (Input.GetKeyDown(KeyCode.L)) { worksheetObj.SetActive(!worksheetObj.activeSelf); }
-        PlayerMove();
     }
     void LateUpdate()
     {
-        PlayerLook();
+        Look();
     }
     void FixedUpdate()
     {
@@ -59,9 +62,12 @@ public class Player : MonoBehaviour
             targetFramerate -= 1;
         }
     }
-    void PlayerLook()
+    /// <summary>
+    /// Controls the camera view of the player - where they are looking
+    /// </summary>
+    void Look()
     {
-        if (PlayerHook.instance.playerHookMoving) { return; }
+        if (Grapple.instance.playerMoving) { return; }
         mouseRotation *= mouseRotationMultiplier * lookSensitivity;
         lookRotY += mouseRotation.x * Time.fixedDeltaTime;
         lookRotX -= mouseRotation.y * Time.fixedDeltaTime;
@@ -69,13 +75,17 @@ public class Player : MonoBehaviour
         transform.eulerAngles = new(lookRotX, lookRotY, 0);
         //Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
     }
-    public void PlayerLookSet(Vector3 eulerAngles) 
+    /// <summary>
+    /// Manually sets the look rotation of the player using euler angles
+    /// </summary>
+    /// <param name="eulerAngles"></param>
+    public void LookSet(Vector3 eulerAngles)
     {
         lookRotX = eulerAngles.x;
         lookRotY = eulerAngles.y;
     }
-	void PlayerMove()
+    public void BeginTutorial()
     {
-		transform.position += movementSpeed * Time.deltaTime * transform.TransformDirection(movementDirection);
-	}
+
+    }
 }

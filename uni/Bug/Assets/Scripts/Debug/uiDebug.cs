@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
-using Unity.Collections;
 using UnityEngine;
 
 public class uiDebug : MonoBehaviour
@@ -17,9 +16,10 @@ public class uiDebug : MonoBehaviour
         uiNotes,
         uiHookStats,
         uiVersion;
-    public GameObject ui, uiDebugGroup;
-    public bool showAllNotes;
+    [SerializeField] GameObject ui, uiDebugGroup;
+    [SerializeField] bool showAllNotes;
     public bool debugMode { get; private set; }
+    [SerializeField] float movementSpeed;
     int deviceFps;
     bool fpsWait;
     void Awake()
@@ -41,41 +41,44 @@ public class uiDebug : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F3)) { debugMode = !debugMode; }
         uiDebugGroup.SetActive(debugMode);
         if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
-        if (debugMode) { GetHookStats(); }
+        if (debugMode)
+        {
+            GetHookStats();
+            debugControls();
+        }
     }
-
-    void GetRes()
+    void GetRes() // gets the current resolution, refresh rate and aspect ratio
     {
         var gcd = Extensions.CalcGCD(Screen.width, Screen.height);
         uiRes.text = Screen.width.ToString() + "x" + Screen.height.ToString() + "\n" 
             + Screen.currentResolution.refreshRateRatio + "Hz" + "\n" +
             (string.Format("{0}:{1}", Screen.width / gcd, Screen.height / gcd));
     }
-    void GetFPS()
+    void GetFPS() // fps counter
     {
         uiFPS.text = ((int)(1 / Time.unscaledDeltaTime)).ToString();
     }
-    void GetHookStats()
+    void GetHookStats() // contructs the grapple debug text, uses stringbuilder & append to slightly improve performance
     {
         uiHookStats.text = new StringBuilder()
             .Append("<u>hookStats;</u>")
-            .Append("\nvalidLocation = ").Append(PlayerHook.instance.playerHookValidLocation)
-            .Append("\noverlapSphere;\n  collisions = ").Append((PlayerHook.instance.playerHookPointCheck != null) ? PlayerHook.instance.playerHookPointCheck.Length : 0)
+            .Append("\nvalidLocation = ").Append(Grapple.instance.grapplePointValid)
+            .Append("\noverlapSphere;\n  collisions = ").Append((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0)
             .Append(GetHookPointCollisions())
-            .Append("\ntargetPosition = ").Append(PlayerHook.instance.debugTargetPosition.x).Append(", ").Append(PlayerHook.instance.debugTargetPosition.y).Append(", ").Append(PlayerHook.instance.debugTargetPosition.z).Append(")")
-            .Append("\ntargetRotation = ").Append(PlayerHook.instance.debugTargetRotation.x).Append(", ").Append(PlayerHook.instance.debugTargetRotation.y).Append(", ").Append(PlayerHook.instance.debugTargetRotation.z).Append(")")
-            .Append("\ndistanceToTargetPosition = ").Append(PlayerHook.instance.debugDistanceToTargetPosition)
+            .Append("\ntargetPosition = ").Append(Grapple.instance.debugTargetPosition.x).Append(", ").Append(Grapple.instance.debugTargetPosition.y).Append(", ").Append(Grapple.instance.debugTargetPosition.z).Append(")")
+            .Append("\ntargetRotation = ").Append(Grapple.instance.debugTargetRotation.x).Append(", ").Append(Grapple.instance.debugTargetRotation.y).Append(", ").Append(Grapple.instance.debugTargetRotation.z).Append(")")
+            .Append("\ndistanceToTargetPosition = ").Append(Grapple.instance.debugDistanceToTargetPosition)
             .ToString();
     }
-    StringBuilder GetHookPointCollisions()
+    StringBuilder GetHookPointCollisions() // returns the names of all objects within the player grapple point collision check
     {
         StringBuilder a = new StringBuilder("\n  names = ");
-        if (PlayerHook.instance.playerHookPointCheck == null) { return a.Append("n/a"); }
-        if (PlayerHook.instance.playerHookPointCheck.Length == 0) { return a.Append("n/a"); }
-        foreach (Collider collider in PlayerHook.instance.playerHookPointCheck) { a.Append(collider.gameObject.name).Append(", "); }
+        if (Grapple.instance.grapplePointCheck == null) { return a.Append("n/a"); }
+        if (Grapple.instance.grapplePointCheck.Length == 0) { return a.Append("n/a"); }
+        foreach (Collider collider in Grapple.instance.grapplePointCheck) { a.Append(collider.gameObject.name).Append(", "); }
         return a;
     }
-    void GetDebugNotes()
+    void GetDebugNotes() // unused
     {
         List<uiDebugNote> notes = ui.GetComponentsInChildren<uiDebugNote>().ToList();
         uiNotes.text = "notes:";
@@ -89,5 +92,13 @@ public class uiDebug : MonoBehaviour
                 uiTodo.text += "\n" + note.toDo; 
             }
         }
+    }
+    void debugControls() // allows for WASD movement control and scroll to change the grapple distance
+    {
+        // wasd movement
+        transform.position += movementSpeed * Time.deltaTime * transform.TransformDirection(InputHandler.instance.input.Player.Move.ReadValue<Vector3>());
+
+        // scroll to change hook distance
+        Grapple.instance.maxDistance += Input.mouseScrollDelta.y;
     }
 }

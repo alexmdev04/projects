@@ -1,15 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class ui : MonoBehaviour
 {
-    public static ui instance;
-    [SerializeField] GameObject[] uiObjs;
+    public static ui instance { get; private set; }
+    public uiGrapple grapple { get; private set; }
+    public uiRadar radar { get; private set; }
+    public uiCrosshair crosshair { get; private set; }
     public static UnityEvent menuChanged { get; private set; }
+
+
+    [SerializeField] TextMeshProUGUI 
+        uiLevelNum,
+        uiCheckpointNum;
+    [SerializeField] GameObject[] 
+        uiObjs;
     public enum menus
     {
         inGame,
@@ -31,23 +39,25 @@ public class ui : MonoBehaviour
         }
     }
     public static menus _currentMenu { get; private set; } = menus.main;
+    void Awake()
+    {
+        instance = this;
+        grapple = GetComponentInChildren<uiGrapple>();
+        radar = GetComponentInChildren<uiRadar>();
+        crosshair = GetComponentInChildren<uiCrosshair>();
+    }
+    void Update()
+    {
+
+    }
     /// <summary>
     /// <para>
     /// Activates the given menu and deactivates all other menus
     /// </para>
     /// <para>Use in StartCoroutine() or this won't do anything</para>
     /// </summary>
-    /// <param name="menuObjects"></param>
     /// <param name="setMenu"></param>
     /// <returns></returns>
-    void Awake()
-    {
-        instance = this;
-    }
-    void Update()
-    {
-
-    }
     public void ForceSetMenu(menus setMenu)
     {
         foreach (GameObject gameObject in uiObjs)
