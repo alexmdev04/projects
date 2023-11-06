@@ -22,6 +22,7 @@ public class uiDebug : MonoBehaviour
     [SerializeField] float movementSpeed;
     int deviceFps;
     bool fpsWait;
+    bool noclipEnabled, godEnabled;
     void Awake()
     {
         instance = this;
@@ -40,7 +41,6 @@ public class uiDebug : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.F3)) { debugMode = !debugMode; }
         uiDebugGroup.SetActive(debugMode);
-        if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
         if (debugMode)
         {
             GetHookStats();
@@ -61,16 +61,16 @@ public class uiDebug : MonoBehaviour
     void GetHookStats() // contructs the grapple debug text, uses stringbuilder & append to slightly improve performance
     {
         uiHookStats.text = new StringBuilder()
-            .Append("<u>hookStats;</u>")
-            .Append("\nvalidLocation = ").Append(Grapple.instance.grapplePointValid)
-            .Append("\noverlapSphere;\n  collisions = ").Append((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0)
-            .Append(GetHookPointCollisions())
+            .Append("<u>grappleStats;</u>")
+            .Append("\ngrapplePointValid = ").Append(Grapple.instance.grapplePointValid)
+            .Append("\ngrapplePointCheck;\n  collisions = ").Append((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0)
+            .Append(GetGrapplePointCollisions())
             .Append("\ntargetPosition = ").Append(Grapple.instance.debugTargetPosition.x).Append(", ").Append(Grapple.instance.debugTargetPosition.y).Append(", ").Append(Grapple.instance.debugTargetPosition.z).Append(")")
             .Append("\ntargetRotation = ").Append(Grapple.instance.debugTargetRotation.x).Append(", ").Append(Grapple.instance.debugTargetRotation.y).Append(", ").Append(Grapple.instance.debugTargetRotation.z).Append(")")
             .Append("\ndistanceToTargetPosition = ").Append(Grapple.instance.debugDistanceToTargetPosition)
             .ToString();
     }
-    StringBuilder GetHookPointCollisions() // returns the names of all objects within the player grapple point collision check
+    StringBuilder GetGrapplePointCollisions() // returns the names of all objects within the player grapple point collision check
     {
         StringBuilder a = new StringBuilder("\n  names = ");
         if (Grapple.instance.grapplePointCheck == null) { return a.Append("n/a"); }
@@ -100,5 +100,27 @@ public class uiDebug : MonoBehaviour
 
         // scroll to change hook distance
         Grapple.instance.maxDistance += Input.mouseScrollDelta.y;
+
+        // toggle goal state
+        if (Input.GetKeyDown(KeyCode.F4)) { LevelLoader.instance.levelCurrent.debugToggleGoal(); }
+
+        // enables debug notes on screen
+        if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }
+
+        // toggles debug console
+        if (Input.GetKeyDown(KeyCode.BackQuote) || Input.GetKeyDown(KeyCode.Tilde)) 
+        {
+            uiDebugConsole.instance.gameObject.SetActive(!uiDebugConsole.instance.gameObject.activeSelf);
+        }
+    }
+    public void ToggleNoclip()
+    {
+        noclipEnabled = !noclipEnabled;
+        string i = noclipEnabled ? "enabled" : "disabled"; uiMessage.instance.New("noclip " + i); 
+    }
+    public void ToggleGod()
+    {
+        godEnabled = !godEnabled;
+        string i = godEnabled ? "enabled" : "disabled"; uiMessage.instance.New("god mode " + i);
     }
 }

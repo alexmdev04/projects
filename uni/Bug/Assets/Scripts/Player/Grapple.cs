@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Grapple : MonoBehaviour
@@ -163,5 +164,20 @@ public class Grapple : MonoBehaviour
                 }
             default: return false;
         }
+    }
+    public void GrapplePointReset()
+    {
+        grapplePoint.transform.position = Vector3.zero;
+        grapplePointValid = false;
+        grapplePoint.SetActive(false);
+        grapplePointCheck = null;
+    }
+    public void Enable()
+    {
+
+    }
+    public void Disable()
+    {
+        
     }
 }
