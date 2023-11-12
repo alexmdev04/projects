@@ -45,7 +45,7 @@ public class Player : MonoBehaviour
         Application.targetFrameRate = targetFramerate;
         lineRenderer.textureScale = new Vector2(lineRenderer.positionCount, 1);
         if (Input.GetKeyDown(KeyCode.Tilde)) { Debug.developerConsoleVisible = !Debug.developerConsoleVisible; }
-        if (Input.GetKeyDown(KeyCode.L)) { worksheetObj.SetActive(!worksheetObj.activeSelf); }
+        if (Input.GetKeyDown(KeyCode.F8)) { worksheetObj.SetActive(!worksheetObj.activeSelf); }
     }
     void LateUpdate()
     {
@@ -85,6 +85,10 @@ public class Player : MonoBehaviour
         lookRotY = eulerAngles.y;
     }
     public void BeginTutorial()
+    {
+
+    }
+    public void debugSetPosition()
     {
 
     }

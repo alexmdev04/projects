@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using UnityEngine;
 
 public static class Extensions
@@ -16,16 +17,6 @@ public static class Extensions
             child.gameObject.layer = layer;
             SetChildLayers(child, layer);
         }
-    }
-    public static string GetDebugNote(this string _this, string[] input, GameObject gameObject)
-    {
-        if (input.Length != 0)
-        {
-            _this += "---- " + gameObject.name + " ----\n";
-            foreach (string _string in input) { _this += _string + "\n"; }
-            return _this;
-        }
-        return "";
     }
     public static Quaternion ReflectRotation(this Quaternion source, Vector3 normal)
     {
@@ -74,5 +65,32 @@ public static class Extensions
             return b;
         else
             return a;
+    }
+    /// <summary>
+    /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
+    /// </summary>
+    /// <param name="vector"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Vector3 vector)
+    {
+        return new StringBuilder().Append("(")
+            .Append(vector.x.ToString()).Append(", ")
+            .Append(vector.y.ToString()).Append(", ")
+            .Append(vector.z.ToString()).Append(")");
+    }
+    /// <summary>
+    /// Converts an array of Colliders to a StringBuilder containing a comma-separated list of all the Collider's GameObject's names
+    /// </summary>
+    /// <param name="colliders"></param>
+    /// <param name="ifNullText"></param>
+    /// <param name="ifEmptyText"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Collider[] colliders, string ifNullText = "n/a", string ifEmptyText = "n/a")
+    {
+        StringBuilder a = new();
+        if (Grapple.instance.grapplePointCheck == null) { return a.Append(ifNullText); }
+        if (Grapple.instance.grapplePointCheck.Length == 0) { return a.Append(ifEmptyText); }
+        foreach (Collider collider in Grapple.instance.grapplePointCheck) { a.Append(collider.gameObject.name).Append(", "); }
+        return a;
     }
 }

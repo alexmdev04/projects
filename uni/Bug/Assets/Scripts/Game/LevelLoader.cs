@@ -11,13 +11,19 @@ public class LevelLoader : MonoBehaviour
 {
     public static LevelLoader instance { get; private set; }
     public Level levelCurrent { get; private set; }
-    [SerializeField] GameObject menuLevel;
+    public GameObject menuLevel;
+    [SerializeField] Vector3 menuLevelStartPosition;
+    SceneInstance levelCurrentSceneInstance;
     void Awake()
     {
         instance = this;
     }
     void Start()
     {
+#if UNITY_EDITOR
+        MenuLevelState(true);
+        if (unloadAllLevelScenesOnStart) { UnloadAllLevelScenesOnStart(); }
+#endif
     }
 
     void Update()
@@ -31,12 +37,12 @@ public class LevelLoader : MonoBehaviour
     /// <param name="levelDifficulty"></param>
     public void ChangeLevel(string levelAssetKey, Level.levelDifficultiesEnum levelDifficulty = Level.levelDifficultiesEnum.normal)
     {
-        AsyncOperation sceneUnload = null;
         if (levelCurrent != null)
         {
-            sceneUnload = SceneManager.UnloadSceneAsync(levelCurrent.gameObject.scene);
-            levelCurrent = null;
+            AsyncOperation sceneUnload = SceneManager.UnloadSceneAsync(levelCurrent.gameObject.scene);
+            UnloadSceneInstance(levelCurrentSceneInstance, levelCurrent.assetKey);
             sceneUnload.completed += delegate { LoadLevel(levelAssetKey, levelDifficulty); };
+            levelCurrent = null;
         }
         else
         {
@@ -49,22 +55,23 @@ public class LevelLoader : MonoBehaviour
     /// <summary>
     /// Loads the given level
     /// </summary>
-    /// <param name="levelSceneName"></param>
+    /// <param name="levelAssetKey"></param>
     /// <param name="levelDifficulty"></param>
     void LoadLevel(string levelAssetKey, Level.levelDifficultiesEnum levelDifficulty = Level.levelDifficultiesEnum.normal)
     {
         AsyncOperationHandle sceneLoad = Addressables.LoadSceneAsync(levelAssetKey, LoadSceneMode.Additive);
-        sceneLoad.Completed += delegate { LoadLevelCompleted(ref sceneLoad); };
+        sceneLoad.Completed += LoadLevelCompleted;
     }
     /// <summary>
     /// Sets the current level when it is loaded
     /// </summary>
     /// <param name="sceneLoad"></param>
-    void LoadLevelCompleted(ref AsyncOperationHandle sceneLoad)
+    void LoadLevelCompleted(AsyncOperationHandle sceneLoad)
     {
-        levelCurrent = ((SceneInstance)sceneLoad.Result).Scene.GetRootGameObjects()[0].GetComponent<Level>();
+        levelCurrentSceneInstance = (SceneInstance)sceneLoad.Result;
+        levelCurrent = levelCurrentSceneInstance.Scene.GetRootGameObjects()[0].GetComponent<Level>();
         MenuLevelState(false);
-        uiMessage.instance.New(levelCurrent.levelSceneName + " - " + levelCurrent.levelInGameName + " loaded!");
+        uiMessage.instance.New(levelCurrent.assetKey + " - " + levelCurrent.inGameName + " loaded!");
     }
     /// <summary>
     /// Loads the prompted level with the ability to edit the objectives of the level
@@ -81,12 +88,55 @@ public class LevelLoader : MonoBehaviour
     {
 
     }
+    public void UnloadLevelCurrent()
+    {
+        if (levelCurrent != null)
+        {
+            string levelAssetKey = levelCurrent.assetKey;
+            AsyncOperation sceneUnload = SceneManager.UnloadSceneAsync(levelCurrent.gameObject.scene);
+            sceneUnload.completed += delegate { MenuLevelState(true, true); };
+            UnloadSceneInstance(levelCurrentSceneInstance, levelAssetKey);
+            levelCurrent = null;
+        }
+        else
+        {
+            uiMessage.instance.New("No level to unload / Already on main menu");
+            MenuLevelState(true);
+        }
+    }
+    void UnloadSceneInstance(SceneInstance sceneInstance, string assetKey)
+    {
+        AsyncOperationHandle sceneInstanceUnload = Addressables.UnloadSceneAsync(sceneInstance, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
+        sceneInstanceUnload.Completed += delegate { uiMessage.instance.New("Unloaded " + assetKey); };
+    }
     /// <summary>
     /// Sets the menu level's active state
     /// </summary>
     /// <param name="state"></param>
-    public void MenuLevelState(bool state)
+    public void MenuLevelState(bool state, bool notify = false)
     {
         menuLevel.SetActive(state);
+        if (state && notify) { uiMessage.instance.New("Returned to main menu"); }
     }
+
+    #region Unload all level scenes on start if in editor
+    #if UNITY_EDITOR
+    [SerializeField] bool unloadAllLevelScenesOnStart = true;
+    List<UnityEngine.SceneManagement.Scene> scenes = new List<UnityEngine.SceneManagement.Scene> ();
+    void UnloadAllLevelScenesOnStart()
+    {
+        for (int i = 0; i < SceneManager.sceneCount; i++) { scenes.Add(SceneManager.GetSceneAt(i)); }
+        foreach (UnityEngine.SceneManagement.Scene scene in scenes)
+        {
+            if (scene.GetRootGameObjects()[0].GetComponent<Level>() != null)
+            {
+                Debug.LogWarning("The scene " + scene.name + " was found on startup and was unloaded.");
+                #pragma warning disable CS0618 // Type or member is obsolete
+                SceneManager.UnloadScene(scene);
+                #pragma warning restore CS0618 // Type or member is obsolete
+            }
+        }
+    }
+    #endif
+    #endregion
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Grapple : MonoBehaviour
 {
@@ -42,7 +43,7 @@ public class Grapple : MonoBehaviour
         hit2;
     MeshRenderer 
         grapplePointRenderer;
-
+    public UnityEvent grappleFired = new();
 
 
 
@@ -119,6 +120,7 @@ public class Grapple : MonoBehaviour
             Vector3 targetPosition = hit1.point + hit1.normal * Player.instance.playerRadius;
             debugTargetPosition = targetPosition;
             debugTargetRotation = targetRotation.eulerAngles;
+            grappleFired.Invoke();
             StartCoroutine(GrapplePlayerMovement(targetPosition, targetRotation));
         }
     }
@@ -143,13 +145,14 @@ public class Grapple : MonoBehaviour
         if (playerRotation) { Player.instance.LookSet(targetRotation.eulerAngles); }
         playerMoving = false;
     }
-    public bool GrappleAmmoCheck()
+    public bool GrappleAmmoCheck() // change to check level for ammo
     {
         switch (ammoState)
         {
             case ammoStateEnum.infinite:
                 {
                     ui.instance.grapple.Refresh(ammoStateEnum.infinite);
+                    LevelLoader.instance.levelCurrent.objectives[0].testEvent.Invoke();
                     return true;
                 }
             case ammoStateEnum.distanceLimited:

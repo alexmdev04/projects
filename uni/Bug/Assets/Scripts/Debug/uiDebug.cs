@@ -1,10 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class uiDebug : MonoBehaviour
 {
@@ -12,9 +11,9 @@ public class uiDebug : MonoBehaviour
     [SerializeField] TextMeshProUGUI
         uiFPS,
         uiRes,
-        uiTodo,
         uiNotes,
-        uiHookStats,
+        uiGrappleStats,
+        uiLevelStats,
         uiVersion;
     [SerializeField] GameObject ui, uiDebugGroup;
     [SerializeField] bool showAllNotes;
@@ -36,6 +35,7 @@ public class uiDebug : MonoBehaviour
     {
         InvokeRepeating(nameof(GetRes), 0f, 1f);
         InvokeRepeating(nameof(GetFPS), 0f, 0.2f);
+        InvokeRepeating(nameof(GetDebugNotes), 0f, 1f);
     }
     void Update()
     {
@@ -43,8 +43,10 @@ public class uiDebug : MonoBehaviour
         uiDebugGroup.SetActive(debugMode);
         if (debugMode)
         {
-            GetHookStats();
+            GetGrappleStats();
+            GetLevelStats();
             debugControls();
+            GetDebugNotes();
         }
     }
     void GetRes() // gets the current resolution, refresh rate and aspect ratio
@@ -58,45 +60,70 @@ public class uiDebug : MonoBehaviour
     {
         uiFPS.text = ((int)(1 / Time.unscaledDeltaTime)).ToString();
     }
-    void GetHookStats() // contructs the grapple debug text, uses stringbuilder & append to slightly improve performance
+    void GetGrappleStats() // contructs the grapple debug text, uses stringbuilder & append to slightly improve performance
     {
-        uiHookStats.text = new StringBuilder()
-            .Append("<u>grappleStats;</u>")
-            .Append("\ngrapplePointValid = ").Append(Grapple.instance.grapplePointValid)
-            .Append("\ngrapplePointCheck;\n  collisions = ").Append((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0)
-            .Append(GetGrapplePointCollisions())
-            .Append("\ntargetPosition = ").Append(Grapple.instance.debugTargetPosition.x).Append(", ").Append(Grapple.instance.debugTargetPosition.y).Append(", ").Append(Grapple.instance.debugTargetPosition.z).Append(")")
-            .Append("\ntargetRotation = ").Append(Grapple.instance.debugTargetRotation.x).Append(", ").Append(Grapple.instance.debugTargetRotation.y).Append(", ").Append(Grapple.instance.debugTargetRotation.z).Append(")")
-            .Append("\ndistanceToTargetPosition = ").Append(Grapple.instance.debugDistanceToTargetPosition)
+        uiGrappleStats.text = new StringBuilder()
+            .Append("<u>Grapple;</u>")
+            .Append("\ngrapplePointValid = ").Append(Grapple.instance.grapplePointValid.ToString())
+            .Append("\ngrapplePointCheck;\n  collisions = ").Append(((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0).ToString())
+            .Append("names = ").Append(Grapple.instance.grapplePointCheck.ToStringBuilder())
+            .Append("\ntargetPosition = ").Append(Grapple.instance.debugTargetPosition.ToStringBuilder())
+            .Append("\ntargetRotation = ").Append(Grapple.instance.debugTargetRotation.ToStringBuilder())
+            .Append("\ndistanceToTargetPosition = ").Append(Grapple.instance.debugDistanceToTargetPosition.ToString())
             .ToString();
     }
-    StringBuilder GetGrapplePointCollisions() // returns the names of all objects within the player grapple point collision check
+    void GetLevelStats() // contructs the level debug text, uses stringbuilder & append to slightly improve performance
     {
-        StringBuilder a = new StringBuilder("\n  names = ");
-        if (Grapple.instance.grapplePointCheck == null) { return a.Append("n/a"); }
-        if (Grapple.instance.grapplePointCheck.Length == 0) { return a.Append("n/a"); }
-        foreach (Collider collider in Grapple.instance.grapplePointCheck) { a.Append(collider.gameObject.name).Append(", "); }
-        return a;
+        uiLevelStats.text = (LevelLoader.instance.levelCurrent != null) ? LevelLoader.instance.levelCurrent.debugGetLevelStats().ToString() : "<u>Level</u>\nNo level loaded";
     }
     void GetDebugNotes() // unused
     {
-        List<uiDebugNote> notes = ui.GetComponentsInChildren<uiDebugNote>().ToList();
-        uiNotes.text = "notes:";
-        uiTodo.text = "todo here:";
-        notes.AddRange(Player.instance.gameObject.GetComponents<uiDebugNote>().ToList());            
-        foreach (uiDebugNote note in notes)
-        {
-            if (note.gameObject.activeSelf || showAllNotes)
+        List<uiDebugNote> noteComponents = new();
+        List<Scene> scenes = new List<Scene>();
+        StringBuilder notesText = new("<u>Notes:</u>"), todosText = new ("<u>\nTo do:</u>");
+
+        for (int i = 0; i < SceneManager.sceneCount; i++) { scenes.Add(SceneManager.GetSceneAt(i)); }
+        foreach (Scene scene in scenes) 
+        { 
+            foreach (GameObject rootObject in scene.GetRootGameObjects()) 
             {
-                uiNotes.text += "\n" + note.note;
-                uiTodo.text += "\n" + note.toDo; 
+                uiDebugNote noteComponent = rootObject.GetComponent<uiDebugNote>();
+                if (noteComponent != null) { noteComponents.Add(noteComponent); }
             }
         }
+        foreach (uiDebugNote noteComponent in noteComponents)
+        {
+            if (noteComponent.notes.Length > 0)
+            {
+                notesText.Append("\n").Append(noteComponent.gameObject.name);
+                foreach (string note in noteComponent.notes) { notesText.Append("\n - ").Append(note); }
+            }
+
+            if (noteComponent.toDos.Length > 0)
+            {
+                todosText.Append("\n").Append(noteComponent.gameObject.name);
+                foreach (string todo in noteComponent.toDos) { todosText.Append("\n - ").Append(todo); }
+            }
+        }
+        uiNotes.text = notesText.Append(todosText).ToString();
     }
     void debugControls() // allows for WASD movement control and scroll to change the grapple distance
     {
         // wasd movement
-        transform.position += movementSpeed * Time.deltaTime * transform.TransformDirection(InputHandler.instance.input.Player.Move.ReadValue<Vector3>());
+
+        Vector3 playerMovementDirection = Vector3.zero;
+
+        bool
+            w = Input.GetKey(KeyCode.W),
+            a = Input.GetKey(KeyCode.A),
+            s = Input.GetKey(KeyCode.S),
+            d = Input.GetKey(KeyCode.D);
+
+        // return true 
+        playerMovementDirection.z = (w || s && !(w && s)) ? (w ? 1 : -1) : 0;
+        playerMovementDirection.x = (a || d && !(a && d)) ? (a ? -1 : 1) : 0;
+
+        Player.instance.transform.position += movementSpeed * Time.deltaTime * Player.instance.transform.TransformDirection(playerMovementDirection);
 
         // scroll to change hook distance
         Grapple.instance.maxDistance += Input.mouseScrollDelta.y;
@@ -116,11 +143,11 @@ public class uiDebug : MonoBehaviour
     public void ToggleNoclip()
     {
         noclipEnabled = !noclipEnabled;
-        string i = noclipEnabled ? "enabled" : "disabled"; uiMessage.instance.New("noclip " + i); 
+        uiMessage.instance.New("noclip " + (noclipEnabled ? "enabled" : "disabled")); 
     }
     public void ToggleGod()
     {
         godEnabled = !godEnabled;
-        string i = godEnabled ? "enabled" : "disabled"; uiMessage.instance.New("god mode " + i);
+        uiMessage.instance.New("god mode " + (godEnabled ? "enabled" : "disabled"));
     }
 }

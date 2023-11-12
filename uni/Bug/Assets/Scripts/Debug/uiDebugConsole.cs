@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
+using System.Linq;
+using System;
 
 public class uiDebugConsole : MonoBehaviour
 {
     public static uiDebugConsole instance { get; private set; }
     TMP_InputField inputField;
     [SerializeField] bool outputCommandInputs;
-    int previousInputsCurrentIndex = 0;
-    string previousInputTemporary;
-    List<string> previousInputs = new() { string.Empty };
+    public int previousInputsCurrentIndex = 0;
+    public List<string> previousInputs = new() { string.Empty };
     string command;
     string data1;
     struct commandInputs
@@ -21,47 +22,34 @@ public class uiDebugConsole : MonoBehaviour
         //public string data2;
         //public string data3;
     }
-    List<string> levels = new()
+    string[] levels = new string[1]
     {
         "Level0"
     };
     void Awake()
     {
+        Vector3 newVector = new Vector3(x: 1, y: 2, z: 3);
         instance = this;
         inputField = GetComponent<TMP_InputField>();
-        inputField.onSubmit.AddListener((string playerInput) => { CheckCommand(playerInput); });
+        inputField.onSubmit.AddListener((string playerInput) => CheckCommand(playerInput) );
         gameObject.SetActive(false);
     }
     void Update()
     {
         inputField.ActivateInputField();
-        if (previousInputsCurrentIndex == 0)
-        {
-            previousInputTemporary = inputField.text;
-        }
-        if (previousInputs.Count > 1)
-        {
-            if (Input.GetKeyDown(KeyCode.UpArrow) && previousInputsCurrentIndex < previousInputs.Count - 1)
-            {
-                previousInputsCurrentIndex++;
-                inputField.text = previousInputs[previousInputsCurrentIndex];
-            }
-            if (Input.GetKeyDown(KeyCode.DownArrow) && previousInputsCurrentIndex > 0)
-            {
-                previousInputsCurrentIndex--;
-                inputField.text = (previousInputsCurrentIndex == 0) ? inputField.text = previousInputTemporary : previousInputTemporary;
-            }
-        }
+        PreviousInput();
     }
     void OnDisable()
     {
-        if (inputField.text == "`") { inputField.text = string.Empty; }
+        previousInputs[0] = string.Empty;
+        inputField.text = string.Empty;
     }
     void CheckCommand(string playerInput)
     {
-        previousInputs.Add(playerInput);
+        string outputMsg = string.Empty;
+        previousInputs.Insert(1, playerInput);
         commandInputs parsedInput = ParseInput(playerInput);
-        command = parsedInput.command;
+        command = parsedInput.command.ToLower();
         data1 = parsedInput.data1;
         if (outputCommandInputs)
         {
@@ -70,7 +58,6 @@ public class uiDebugConsole : MonoBehaviour
                       //"input2 = \"" + commandInputs.input2 + "\", " +
                       //"input3 = \"" + commandInputs.input3 + "\"");
         }
-
         switch (parsedInput.command)
         {
             case "level":
@@ -84,7 +71,7 @@ public class uiDebugConsole : MonoBehaviour
                         }
                         else
                         {
-                            uiMessage.instance.New("Unknown level: \"" + parsedInput.data1 + "\"");
+                            outputMsg = "Unknown level: \"" + parsedInput.data1 + "\"";
                         }
                     }
                     break;
@@ -131,9 +118,37 @@ public class uiDebugConsole : MonoBehaviour
                     uiDebug.instance.ToggleNoclip();
                     break;
                 }
+            case "menu":
+                {
+                    LevelLoader.instance.UnloadLevelCurrent();
+                    break;
+                }
+            case "player":
+                {
+                    switch (parsedInput.data1)
+                    {
+                        case "position":
+                            {
+                                //Player.instance.debugSetPosition(parsedInput.data2);
+                                outputMsg = "Not Implemented";
+                                break;
+                            }
+                        case "position reset":
+                            {
+                                outputMsg = "Player position has been reset";
+                                break;
+                            }
+                    }
+                    break;
+                }
+            case "tutorial":
+                {
+                    LevelLoader.instance.UnloadLevelCurrent();
+                    LevelLoader.instance.menuLevel.GetComponent<uiMenuLevel>().ForceRestartTutorial();
+                    break;
+                }
             case "":
                 {
-                    Debug.LogError("No command entered");
                     break;
                 }
             default:
@@ -143,6 +158,11 @@ public class uiDebugConsole : MonoBehaviour
                 }
         }
         inputField.text = "";
+        if (outputMsg != string.Empty)
+        {
+            uiMessage.instance.New(outputMsg);
+            if (uiDebug.instance.debugMode) { Debug.Log(outputMsg); }
+        }
         gameObject.SetActive(false);
     }
     commandInputs ParseInput(string input)
@@ -205,5 +225,28 @@ public class uiDebugConsole : MonoBehaviour
     void InvalidInput()
     {
         uiMessage.instance.New("Invalid input \"" + data1 + "\" for \"" + command + "\" command");
+    }
+    void PreviousInput()
+    {
+        if (previousInputsCurrentIndex == 0) { previousInputs[0] = inputField.text; }
+        if (previousInputs.Count > 1)
+        {
+            if (Input.GetKeyDown(KeyCode.UpArrow) && previousInputsCurrentIndex < previousInputs.Count - 1)
+            {
+                previousInputsCurrentIndex++;
+                inputField.text = previousInputs[previousInputsCurrentIndex];
+                char[] inputFieldChars = inputField.text.ToCharArray();
+                inputField.stringPosition = inputFieldChars.ToList().IndexOf(inputFieldChars[^1]) + 1;
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow) && previousInputsCurrentIndex > 0)
+            {
+                previousInputsCurrentIndex--;
+                inputField.text = previousInputs[previousInputsCurrentIndex];
+            }
+        }
+    }
+    public void InternalCommandCall(string input)
+    {
+        CheckCommand(input);
     }
 }

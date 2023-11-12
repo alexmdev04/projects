@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Goal : MonoBehaviour
+public class LevelGoal : MonoBehaviour
 {
     public bool goalUnlocked
     {
@@ -23,7 +23,6 @@ public class Goal : MonoBehaviour
     [SerializeField] Vector3 
         lockedPosition,
         unlockedPosition;
-
     void Awake()
     {
         if (movingObjectIsThisObject) { movingObject = gameObject; }
@@ -31,5 +30,18 @@ public class Goal : MonoBehaviour
     void Update()
     {
 
+    }
+    void trigger()
+    {
+        
+    }
+    void OnTriggerEnter(Collider collision)
+    {
+        Debug.Log(collision.gameObject.name);
+        if (collision.gameObject.GetComponent<Player>() != null)
+        {
+            uiMessage.instance.New("Goal Reached!");
+            uiDebugConsole.instance.InternalCommandCall("menu");
+        }
     }
 }

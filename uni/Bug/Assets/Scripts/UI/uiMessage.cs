@@ -30,12 +30,14 @@ public class uiMessage : MonoBehaviour
         messageCount = 0;
         foreach (string msg in messages)
         {
-            if (msg == string.Empty) { continue; } // if a message has been nullified it is skipped 
+            // if a message has been nullified it is skipped 
+            if (msg == string.Empty) { continue; } 
             messageCount++;
             displayText.Append(msg).Append("\n");
         }
         textBox.text = displayText.ToString();
-        if (textBox.text == string.Empty) { Clear(); } // if all messages are nullified, the lists are cleared
+        // if all messages are nullified, the lists are cleared
+        if (textBox.text == string.Empty) { Clear(); } 
 
         // depending on the current number of messages,
         targetYPos = startYPos + (messageCount * yPerMsg);
@@ -55,6 +57,7 @@ public class uiMessage : MonoBehaviour
         messages.Add(text);
         messageDurations.Add(duration);
         StartCoroutine(RemoveAfter(messages.IndexOf(text), duration));
+        if (uiDebug.instance.debugMode) { Debug.Log(text); }
     }
     /// <summary>
     /// Waits until removing a uiMessage at a given index
