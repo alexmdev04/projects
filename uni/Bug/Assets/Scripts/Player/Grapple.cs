@@ -15,6 +15,7 @@ public class Grapple : MonoBehaviour
     public Vector3 debugTargetPosition { get; private set; }
     public Vector3 debugTargetRotation { get; private set; }
     public float debugDistanceToTargetPosition { get; private set; }
+    public GameObject grappleDestinationMarker;
     public enum ammoStateEnum
     {
         infinite,
@@ -27,25 +28,28 @@ public class Grapple : MonoBehaviour
         maxDistance = 500f, 
         distanceFromWall = 0.1f,
         moveSpeed = 1f,
-        rotateSpeed = 1f;
+        rotateSpeed = 1f, 
+        distanceTravelled;
     [SerializeField] GameObject 
-        grapplePoint,
-        testCube1;
+        grapplePoint;
     [SerializeField] LayerMask 
         layerMask = ~(1 << 2);
-    float 
-        ammoDistanceCurrent,
-        ammoDistanceMax,
-        ammoUsesCurrent,
-        ammoUsesMax;
+    //float 
+    //    ammoDistanceCurrent,
+    //    ammoDistanceMax,
+    //    ammoUsesCurrent,
+    //    ammoUsesMax;
     RaycastHit 
         hit1, 
         hit2;
     MeshRenderer 
         grapplePointRenderer;
-    public UnityEvent grappleFired = new();
-
-
+    bool 
+        movementActive,
+        grappleCancelled;
+    [HideInInspector] public UnityEvent 
+        grappleFired = new(),
+        grappleFinished = new();
 
     void Awake()
     {
@@ -63,7 +67,7 @@ public class Grapple : MonoBehaviour
     {
         // currently the grappling is disabled until the player reaches the grapple point
         if (playerMoving) { return; } 
-
+        if (grappleCancelled) { return; }
         // grapplePoint is the holographic representation of the player while holding the grapple button
         // green = valid grapple point, red = invalid grapple point
         grapplePoint.SetActive(true);
@@ -111,10 +115,11 @@ public class Grapple : MonoBehaviour
         // currently the grappling is disabled until the player reaches the grapple point
         if (playerMoving) { return; }
         grapplePoint.SetActive(false);
-
-        if (grapplePointValid)// && Physics.Raycast(Player.instance.transform.position, Player.instance.transform.TransformDirection(Vector3.forward), out hit2))
+        if (grappleCancelled) { grappleCancelled = false; return; }
+        if (!movementActive) { return; }
+        if (grapplePointValid)
         {
-			// lerp to pos
+			// lerp to the grapple destination and reflect rotation if enabled
 			playerMoving = true;
             Quaternion targetRotation = Player.instance.transform.rotation.ReflectRotation(hit1.normal);
             Vector3 targetPosition = hit1.point + hit1.normal * Player.instance.playerRadius;
@@ -132,7 +137,8 @@ public class Grapple : MonoBehaviour
     /// <returns></returns>
     public IEnumerator GrapplePlayerMovement(Vector3 targetPosition, Quaternion targetRotation)
     {
-        testCube1.transform.position = targetPosition;
+        if (grappleDestinationMarker.activeSelf) { grappleDestinationMarker.transform.position = targetPosition; }
+        distanceTravelled = Vector3.Distance(Player.instance.transform.position, targetPosition);
         do
         {
             Player.instance.transform.position = Vector3.MoveTowards(Player.instance.transform.position, targetPosition, Time.deltaTime * moveSpeed);
@@ -144,36 +150,46 @@ public class Grapple : MonoBehaviour
         Player.instance.transform.position = targetPosition;
         if (playerRotation) { Player.instance.LookSet(targetRotation.eulerAngles); }
         playerMoving = false;
+        grappleFinished.Invoke();
+        distanceTravelled = 0;
     }
-    public bool GrappleAmmoCheck() // change to check level for ammo
-    {
-        switch (ammoState)
-        {
-            case ammoStateEnum.infinite:
-                {
-                    ui.instance.grapple.Refresh(ammoStateEnum.infinite);
-                    LevelLoader.instance.levelCurrent.objectives[0].testEvent.Invoke();
-                    return true;
-                }
-            case ammoStateEnum.distanceLimited:
-                {
-                    ui.instance.grapple.Refresh(ammoStateEnum.distanceLimited, ammoDistanceCurrent, ammoDistanceMax);
-                    return ammoDistanceCurrent > 0;
-                }
-            case ammoStateEnum.usesLimited:
-                {
-                    ui.instance.grapple.Refresh(ammoStateEnum.usesLimited, ammoUsesCurrent, ammoUsesMax);
-                    return ammoUsesCurrent > 0;
-                }
-            default: return false;
-        }
-    }
+    //public bool GrappleAmmoCheck() // change to check level for ammo
+    //{
+    //    switch (ammoState)
+    //    {
+    //        case ammoStateEnum.infinite:
+    //            {
+    //                ui.instance.grapple.Refresh(ammoStateEnum.infinite);
+    //                return true;
+    //            }
+    //        case ammoStateEnum.distanceLimited:
+    //            {
+    //                ui.instance.grapple.Refresh(ammoStateEnum.distanceLimited, ammoDistanceCurrent, ammoDistanceMax);
+    //                return ammoDistanceCurrent > 0;
+    //            }
+    //        case ammoStateEnum.usesLimited:
+    //            {
+    //                ui.instance.grapple.Refresh(ammoStateEnum.usesLimited, ammoUsesCurrent, ammoUsesMax);
+    //                return ammoUsesCurrent > 0;
+    //            }
+    //        default: return false;
+    //    }
+    //}
     public void GrapplePointReset()
     {
         grapplePoint.transform.position = Vector3.zero;
         grapplePointValid = false;
         grapplePoint.SetActive(false);
         grapplePointCheck = null;
+    }
+    public void Cancel()
+    {
+        grappleCancelled = true;
+        grapplePoint.SetActive(false);
+    }
+    public void SetMovementActive(bool state)
+    {
+        movementActive = state;
     }
     public void Enable()
     {

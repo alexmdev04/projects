@@ -12,8 +12,7 @@ public class uiDebug : MonoBehaviour
         uiFPS,
         uiRes,
         uiNotes,
-        uiGrappleStats,
-        uiLevelStats,
+        uiStats,
         uiVersion;
     [SerializeField] GameObject ui, uiDebugGroup;
     [SerializeField] bool showAllNotes;
@@ -43,8 +42,7 @@ public class uiDebug : MonoBehaviour
         uiDebugGroup.SetActive(debugMode);
         if (debugMode)
         {
-            GetGrappleStats();
-            GetLevelStats();
+            uiStats.text = GetStats().ToString();
             debugControls();
             GetDebugNotes();
         }
@@ -60,24 +58,23 @@ public class uiDebug : MonoBehaviour
     {
         uiFPS.text = ((int)(1 / Time.unscaledDeltaTime)).ToString();
     }
-    void GetGrappleStats() // contructs the grapple debug text, uses stringbuilder & append to slightly improve performance
+    StringBuilder GetStats() // contructs all stats for the debug overlay, uses stringbuilder & append to slightly improve performance
     {
-        uiGrappleStats.text = new StringBuilder()
+        return new StringBuilder()
+            // grapple stats
             .Append("<u>Grapple;</u>")
             .Append("\ngrapplePointValid = ").Append(Grapple.instance.grapplePointValid.ToString())
             .Append("\ngrapplePointCheck;\n  collisions = ").Append(((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0).ToString())
-            .Append("names = ").Append(Grapple.instance.grapplePointCheck.ToStringBuilder())
+            .Append(", names = ").Append((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.ToStringBuilder() : "n/a")
             .Append("\ntargetPosition = ").Append(Grapple.instance.debugTargetPosition.ToStringBuilder())
             .Append("\ntargetRotation = ").Append(Grapple.instance.debugTargetRotation.ToStringBuilder())
             .Append("\ndistanceToTargetPosition = ").Append(Grapple.instance.debugDistanceToTargetPosition.ToString())
-            .ToString();
+            // level stats
+            .Append("\n\n").Append((LevelLoader.instance.levelCurrent != null) ? LevelLoader.instance.levelCurrent.debugGetLevelStats().ToString() : "<u>Level</u>\nNo level loaded");
     }
-    void GetLevelStats() // contructs the level debug text, uses stringbuilder & append to slightly improve performance
+    void GetDebugNotes() // scans all loaded scenes and their root game objects for uiDebugNote components and combines them all
     {
-        uiLevelStats.text = (LevelLoader.instance.levelCurrent != null) ? LevelLoader.instance.levelCurrent.debugGetLevelStats().ToString() : "<u>Level</u>\nNo level loaded";
-    }
-    void GetDebugNotes() // unused
-    {
+        if (!showAllNotes) { return; }
         List<uiDebugNote> noteComponents = new();
         List<Scene> scenes = new List<Scene>();
         StringBuilder notesText = new("<u>Notes:</u>"), todosText = new ("<u>\nTo do:</u>");

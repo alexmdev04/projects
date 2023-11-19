@@ -6,39 +6,53 @@ using UnityEngine.SceneManagement;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
+using UnityEngine.Events;
 
 public class LevelLoader : MonoBehaviour
 {
     public static LevelLoader instance { get; private set; }
     public Level levelCurrent { get; private set; }
+    public bool inLevel { get; private set; }
     public GameObject menuLevel;
     [SerializeField] Vector3 menuLevelStartPosition;
+    [SerializeField] bool skipTutorials;
+    uiMenuLevel uiMenuLevel;
     SceneInstance levelCurrentSceneInstance;
+    [HideInInspector] public UnityEvent levelLoaded = new();
     void Awake()
     {
         instance = this;
-    }
+        uiMenuLevel = menuLevel.GetComponent<uiMenuLevel>();
+        uiMenuLevel.skipTutorial = skipTutorials;
+    }   
     void Start()
     {
 #if UNITY_EDITOR
         MenuLevelState(true);
         if (unloadAllLevelScenesOnStart) { UnloadAllLevelScenesOnStart(); }
+        int tutorialComplete = PlayerPrefs.GetInt("tutorialComplete", 0);
+        if (tutorialComplete == 0)
+        {
+            StartCoroutine(uiMenuLevel.TutorialStart());
+        }
 #endif
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.F5)) { ChangeLevel("Level0"); }
+        inLevel = levelCurrent != null;
     }
     /// <summary>
     /// Changes to a new level by unloading the current level and loading the given level
     /// </summary>
-    /// <param name="levelSceneName"></param>
+    /// <param name="levelAssetKey"></param>
     /// <param name="levelDifficulty"></param>
     public void ChangeLevel(string levelAssetKey, Level.levelDifficultiesEnum levelDifficulty = Level.levelDifficultiesEnum.normal)
     {
         if (levelCurrent != null)
         {
+            levelCurrent.Unload();
             AsyncOperation sceneUnload = SceneManager.UnloadSceneAsync(levelCurrent.gameObject.scene);
             UnloadSceneInstance(levelCurrentSceneInstance, levelCurrent.assetKey);
             sceneUnload.completed += delegate { LoadLevel(levelAssetKey, levelDifficulty); };
@@ -72,6 +86,7 @@ public class LevelLoader : MonoBehaviour
         levelCurrent = levelCurrentSceneInstance.Scene.GetRootGameObjects()[0].GetComponent<Level>();
         MenuLevelState(false);
         uiMessage.instance.New(levelCurrent.assetKey + " - " + levelCurrent.inGameName + " loaded!");
+        levelLoaded.Invoke();
     }
     /// <summary>
     /// Loads the prompted level with the ability to edit the objectives of the level
@@ -92,6 +107,7 @@ public class LevelLoader : MonoBehaviour
     {
         if (levelCurrent != null)
         {
+            levelCurrent.Unload();
             string levelAssetKey = levelCurrent.assetKey;
             AsyncOperation sceneUnload = SceneManager.UnloadSceneAsync(levelCurrent.gameObject.scene);
             sceneUnload.completed += delegate { MenuLevelState(true, true); };

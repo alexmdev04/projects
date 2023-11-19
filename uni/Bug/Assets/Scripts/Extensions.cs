@@ -27,24 +27,14 @@ public static class Extensions
     /// </summary>
     /// <param name="seconds"></param>
     /// <returns></returns>
-    public static string ConvertTime(float seconds)
+    public static string ConvertTime(this double seconds)
     {
         TimeSpan ts = TimeSpan.FromSeconds((int)seconds);
-
-        if (ts.Days > 0)
-        //{ return ts.Days + "d " + ts.Hours + "h " + ts.Minutes + "m " + ts.Seconds + "s"; }
-        { return string.Format("{0}d {1}h {2}m {3}s ", ts.Days, ts.Hours, ts.Minutes, ts.Seconds); }
-
-        else if (ts.Hours > 0)
-        //{ return ts.Hours + "h " + ts.Minutes + "m " + ts.Seconds + "s"; }
-        { return string.Format("{0}h {1}m {2}s ", ts.Hours, ts.Minutes, ts.Seconds); }
-
-        else if (ts.Minutes > 0)
-        //{ return ts.Minutes + "m " + ts.Seconds + "s"; }
-        { return string.Format("{0}m {1}s ", ts.Minutes, ts.Seconds); }
-
-        else //{ return ts.Seconds + "s"; }
-        { return string.Format("{0}s ", ts.Seconds); }
+        return
+            (ts.Days > 0 ? ts.Days.ToString() + "d " : "") +
+            (ts.Hours > 0 ? ts.Hours.ToString() + "h " : "") +
+            (ts.Minutes > 0 ? ts.Minutes.ToString() + "m " : "") +
+            (ts.Seconds > 0 ? ts.Seconds.ToString() + "s " : "0s");
     }
     /// <summary>
     /// Calculates the greatest common denominator of a and b

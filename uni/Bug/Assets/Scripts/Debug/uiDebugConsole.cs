@@ -22,9 +22,10 @@ public class uiDebugConsole : MonoBehaviour
         //public string data2;
         //public string data3;
     }
-    string[] levels = new string[1]
+    string[] levels = new string[2]
     {
-        "Level0"
+        "Level0",
+        "Level1"
     };
     void Awake()
     {
@@ -88,6 +89,11 @@ public class uiDebugConsole : MonoBehaviour
                         case "disable":
                             {
                                 Grapple.instance.Disable();
+                                break;
+                            }
+                        case "testcube":
+                            {
+                                Grapple.instance.grappleDestinationMarker.SetActive(Grapple.instance.grappleDestinationMarker.activeSelf);
                                 break;
                             }
                         default:

@@ -18,7 +18,12 @@ public class InputHandler : MonoBehaviour
     void Update()
     {
         // grapple button held
-        if (input.Player.Grapple.IsPressed()) { Grapple.instance.GrappleHeld(); }
+        if (input.Player.Grapple.IsPressed()) 
+        { 
+            Grapple.instance.GrappleHeld();
+            if (input.Player.CancelGrapple.IsPressed()) { Grapple.instance.Cancel(); }
+        }
+
 
         // grapple button released
         if (input.Player.Grapple.WasReleasedThisFrame()) { Grapple.instance.GrappleReleased(); } 
@@ -26,6 +31,6 @@ public class InputHandler : MonoBehaviour
         // mouse vector
         Player.instance.mouseRotation = input.Player.Look.ReadValue<Vector2>(); 
 
-        if (Input.GetKeyDown(KeyCode.R)) { Grapple.instance.GrappleAmmoCheck(); }
+        //if (Input.GetKeyDown(KeyCode.R)) { Grapple.instance.GrappleAmmoCheck(); }
 	}
 }

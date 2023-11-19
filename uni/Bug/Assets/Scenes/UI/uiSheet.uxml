@@ -1,3 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="uiRadarView" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&apos;project://database/Assets/Textures/radar.renderTexture?fileID=8400000&amp;guid=9f0ae34596a50694fa0286e14ab40396&amp;type=2#radar&apos;); height: 100px; width: 100px;" />
-</ui:UXML>

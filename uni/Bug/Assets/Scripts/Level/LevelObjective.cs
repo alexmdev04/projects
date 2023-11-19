@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
     
@@ -11,20 +14,160 @@ public class LevelObjective : ScriptableObject
     {
         grappleUses,
         grappleDistance,
-        timeLimit
+        timeLimit,
+        alertLevel
+    }
+    public enum objectiveCompletionTypes
+    {
+        doNotExceedCompletionValue,
+        mustExceedCompletetionValue
     }
     [SerializeField] objectiveTypes type;
-    [SerializeField] bool requiredForCompletion;
-    [SerializeField] double value;
-    [SerializeField] double scoreAwarded;
-    public UnityEvent testEvent = new();
-
-    void Awake()
+    [SerializeField] objectiveCompletionTypes completionType;
+    public bool requiredForCompletion;
+    [SerializeField] bool uiValueCountDown;
+    [SerializeField] [Tooltip("The player must be at this value to complete the objective")] double completionValue;
+    public double currentValue
     {
-        if (type == objectiveTypes.grappleUses)
+        get
         {
-            value = (int)value;
+            return _currentValue;
         }
-        Grapple.instance.grappleFired.AddListener(delegate { uiMessage.instance.New("grapple"); } );
+        set
+        {
+            _currentValue = value;
+            if (LevelLoader.instance.inLevel)
+            {
+                uiObjective.Refresh(uiGetText());
+            }
+        }
     }
-}
+    double _currentValue = 0d;
+    [SerializeField] [Tooltip("When the level ends this score will be awarded if the objective is complete")] double scoreAwarded;
+    [HideInInspector] public uiObjective uiObjective;
+    public bool successfulStart = false;
+    public void Start()
+    {
+        currentValue = 0;
+        switch (type)
+        {
+            case objectiveTypes.grappleUses:
+                {
+                    completionValue = (int)completionValue;
+                    Grapple.instance.grappleFired.AddListener(delegate { currentValueEdit(1); Debug.Log("yo"); });
+                    break;
+                }
+            case objectiveTypes.grappleDistance:
+                {
+                    Grapple.instance.grappleFinished.AddListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); Debug.Log("yo"); });
+                    break;
+                }
+            case objectiveTypes.timeLimit:
+                {
+                    break;
+                }
+            case objectiveTypes.alertLevel:
+                {
+                    break;
+                }
+
+        }
+    }
+    public void Stop()
+    {
+        Grapple.instance.grappleFired.RemoveListener(delegate { currentValueEdit(1); Debug.Log("yo"); });
+        Grapple.instance.grappleFinished.RemoveListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); Debug.Log("yo"); });
+    }
+    void currentValueSet(double value)
+    {
+        currentValue = value;
+    }
+    void currentValueEdit(double value)
+    {
+        if (currentValue >= completionValue)
+        {
+            Debug.Log(name + " completion value reached (" + completionValue + ")");
+            currentValue = completionValue;
+            return;
+        }
+        Debug.Log(name + " value edited by " + value);
+        currentValue += value;
+    }
+    public void currentValueUpdate()
+    {
+        if (type == objectiveTypes.timeLimit && currentValue < completionValue)
+        {
+            currentValue += Time.deltaTime;
+        }
+    }
+    public bool isCompleted()
+    {
+        bool value;
+        switch (completionType)
+        {
+            case objectiveCompletionTypes.doNotExceedCompletionValue:
+                {
+                    value = currentValue <= completionValue;
+                    break;
+                }
+            case objectiveCompletionTypes.mustExceedCompletetionValue:
+                {
+                    value = currentValue > completionValue;
+                    break;
+                }
+            default: 
+                { 
+                    value = false;
+                    break;
+                }
+        }
+        uiObjective.objectiveCompleted = value;
+        return value;
+    }
+    public string uiGetText()
+    {
+        string text = name;
+        string customReturn = string.Empty;
+        string unit = string.Empty;
+        switch (type)
+        {
+            case objectiveTypes.grappleUses:
+                {
+                    text = "Grapple Uses = ";
+                    break;
+                }
+            case objectiveTypes.grappleDistance:
+                {
+                    text = "Grapple Distance = ";
+                    unit = "m";
+                    break;
+                }
+            case objectiveTypes.timeLimit:
+                {
+                    text = "Time = ";
+                    customReturn = (completionValue - currentValue).ConvertTime() + " left";
+                    break;
+                }
+        }
+        return text += (customReturn != string.Empty) ? customReturn : 
+            (uiValueCountDown ? completionValue - currentValue + unit + " left" : currentValue + unit + " / " + completionValue + unit);
+    }
+    public StringBuilder debugGetObjective()
+    {
+        return new StringBuilder("\n").Append(name).Append(" - ").Append(type).Append(" = ").Append(currentValue).Append(" / ").Append(completionValue);
+    }
+    //private float FloatFromAxis(bool positive, bool negative) =>
+    //    (positive, negative) switch
+    //    {
+    //        (true, false) => 1f,
+    //        (false, true) => -1f,
+    //        _ => 0f
+    //    };
+
+    //private Vector2 GetInput()
+    //{
+    //    float horizontal = FloatFromAxis(Input.GetKey(KeyCode.A), Input.GetKey(KeyCode.D));
+    //    float vertical = FloatFromAxis(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S));
+    //    return new Vector2(horizontal, vertical);
+    //}
+} 

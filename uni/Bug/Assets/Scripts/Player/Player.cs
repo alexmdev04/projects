@@ -76,7 +76,8 @@ public class Player : MonoBehaviour
         //Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
     }
     /// <summary>
-    /// Manually sets the look rotation of the player using euler angles
+    /// <para>Manually sets the rotation of the player</para>
+    /// <para>Used instead of Player.instance.transform.eulerAngles = Vector3</para>
     /// </summary>
     /// <param name="eulerAngles"></param>
     public void LookSet(Vector3 eulerAngles)
@@ -84,9 +85,25 @@ public class Player : MonoBehaviour
         lookRotX = eulerAngles.x;
         lookRotY = eulerAngles.y;
     }
+    /// <summary>
+    /// <para>Manually sets the rotation of the player</para>
+    /// <para>Used instead of Player.instance.transform.rotation = Quaternion</para>
+    /// </summary>
+    /// <param name="quaternion"></param>
+    public void LookSet(Quaternion quaternion)
+    {
+        Vector3 eulerAngles = quaternion.eulerAngles;
+        lookRotX = eulerAngles.x;
+        lookRotY = eulerAngles.y;
+    }
     public void BeginTutorial()
     {
 
+    }
+    public void TeleportInstant(Vector3 worldSpacePosition, Vector3 worldSpaceEulerAngles = default)
+    {
+        transform.position = worldSpacePosition;
+        if (worldSpaceEulerAngles != default) { LookSet(worldSpaceEulerAngles); }
     }
     public void debugSetPosition()
     {

@@ -14,6 +14,7 @@ public class LevelGoal : MonoBehaviour
         { 
             _goalUnlocked = value;
             movingObject.transform.localPosition = value ? unlockedPosition : lockedPosition;
+            goalLight.color = value ? Color.green : Color.red;
         }
     }
     bool _goalUnlocked;
@@ -23,17 +24,11 @@ public class LevelGoal : MonoBehaviour
     [SerializeField] Vector3 
         lockedPosition,
         unlockedPosition;
+    [SerializeField] Light goalLight;
     void Awake()
     {
         if (movingObjectIsThisObject) { movingObject = gameObject; }
-    }
-    void Update()
-    {
-
-    }
-    void trigger()
-    {
-        
+        //goalLight = GetComponentInChildren<Light>();
     }
     void OnTriggerEnter(Collider collision)
     {
