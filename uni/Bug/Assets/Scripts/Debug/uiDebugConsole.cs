@@ -5,6 +5,8 @@ using TMPro;
 using Unity.VisualScripting;
 using System.Linq;
 using System;
+using System.ComponentModel;
+using static System.ComponentModel.TypeConverter;
 
 public class uiDebugConsole : MonoBehaviour
 {
@@ -52,6 +54,7 @@ public class uiDebugConsole : MonoBehaviour
         commandInputs parsedInput = ParseInput(playerInput);
         command = parsedInput.command.ToLower();
         data1 = parsedInput.data1;
+        bool data1Present = data1 != string.Empty;
         if (outputCommandInputs)
         {
             Debug.Log("command = \"" + parsedInput.command + "\", " +
@@ -63,18 +66,17 @@ public class uiDebugConsole : MonoBehaviour
         {
             case "level":
                 {
-                    foreach (string level in levels)
+                    if (!data1Present)
                     {
-                        if (parsedInput.data1 == level)
-                        {
-                            LevelLoader.instance.ChangeLevel(parsedInput.data1);
-                            break;
-                        }
-                        else
-                        {
-                            outputMsg = "Unknown level: \"" + parsedInput.data1 + "\"";
-                        }
+                        InvalidInput();
+                        break;
                     }
+                    if (!parsedInput.data1.ToCharArray()[5..].AllCharsAreDigits())
+                    {
+                        outputMsg = "Unknown level: \"" + parsedInput.data1 + "\"";
+                        break;
+                    }
+                    LevelLoader.instance.ChangeLevel(parsedInput.data1);
                     break;
                 }
             case "grapple":

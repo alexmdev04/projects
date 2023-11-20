@@ -57,7 +57,7 @@ public class uiMessage : MonoBehaviour
         messages.Add(text);
         messageDurations.Add(duration);
         StartCoroutine(RemoveAfter(messages.IndexOf(text), duration));
-        if (uiDebug.instance.debugMode) { Debug.Log(text); }
+        //if (uiDebug.instance.debugMode) { Debug.Log(text); }
     }
     /// <summary>
     /// Waits until removing a uiMessage at a given index

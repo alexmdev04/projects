@@ -19,8 +19,10 @@ public class LevelObjective : ScriptableObject
     }
     public enum objectiveCompletionTypes
     {
-        doNotExceedCompletionValue,
-        mustExceedCompletetionValue
+        lessThanCompletionValue,
+        lessThanEqualToCompletionValue,
+        greaterThanCompletetionValue,
+        greaterThanEqualToCompletetionValue
     }
     [SerializeField] objectiveTypes type;
     [SerializeField] objectiveCompletionTypes completionType;
@@ -54,12 +56,12 @@ public class LevelObjective : ScriptableObject
             case objectiveTypes.grappleUses:
                 {
                     completionValue = (int)completionValue;
-                    Grapple.instance.grappleFired.AddListener(delegate { currentValueEdit(1); Debug.Log("yo"); });
+                    Grapple.instance.grappleFired.AddListener(delegate { currentValueEdit(1); });
                     break;
                 }
             case objectiveTypes.grappleDistance:
                 {
-                    Grapple.instance.grappleFinished.AddListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); Debug.Log("yo"); });
+                    Grapple.instance.grappleFinished.AddListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); });
                     break;
                 }
             case objectiveTypes.timeLimit:
@@ -75,8 +77,8 @@ public class LevelObjective : ScriptableObject
     }
     public void Stop()
     {
-        Grapple.instance.grappleFired.RemoveListener(delegate { currentValueEdit(1); Debug.Log("yo"); });
-        Grapple.instance.grappleFinished.RemoveListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); Debug.Log("yo"); });
+        Grapple.instance.grappleFired.RemoveListener(delegate { currentValueEdit(1); });
+        Grapple.instance.grappleFinished.RemoveListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); });
     }
     void currentValueSet(double value)
     {
@@ -90,7 +92,6 @@ public class LevelObjective : ScriptableObject
             currentValue = completionValue;
             return;
         }
-        Debug.Log(name + " value edited by " + value);
         currentValue += value;
     }
     public void currentValueUpdate()
@@ -105,22 +106,34 @@ public class LevelObjective : ScriptableObject
         bool value;
         switch (completionType)
         {
-            case objectiveCompletionTypes.doNotExceedCompletionValue:
+            case objectiveCompletionTypes.lessThanCompletionValue:
+                {
+                    value = currentValue < completionValue;
+                    break;
+                }
+            case objectiveCompletionTypes.lessThanEqualToCompletionValue:
                 {
                     value = currentValue <= completionValue;
                     break;
                 }
-            case objectiveCompletionTypes.mustExceedCompletetionValue:
+            case objectiveCompletionTypes.greaterThanCompletetionValue:
                 {
                     value = currentValue > completionValue;
                     break;
                 }
-            default: 
-                { 
+            case objectiveCompletionTypes.greaterThanEqualToCompletetionValue:
+                {
+                    value = currentValue >= completionValue;
+                    break;
+                }
+            default:
+                {
                     value = false;
                     break;
                 }
         }
+
+
         uiObjective.objectiveCompleted = value;
         return value;
     }

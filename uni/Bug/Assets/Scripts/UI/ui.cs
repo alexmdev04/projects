@@ -83,6 +83,11 @@ public class ui : MonoBehaviour
             uiObjectiveNew.gameObject.SetActive(true);
         }
     }
+    public void uiObjectivesDestroy()
+    {
+        foreach (uiObjective uiObjective in uiObjectives) { Destroy(uiObjective.gameObject); }
+        uiObjectives.Clear();
+    }
     /// <summary>
     /// Keeps the text displayed on all uiObjectives up to date with current values
     /// </summary>

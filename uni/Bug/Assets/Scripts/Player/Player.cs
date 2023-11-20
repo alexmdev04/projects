@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
         Cursor.visible = false;
         lineRenderer = GetComponent<LineRenderer>();
         Debug.developerConsoleEnabled = true;
+        playerDimensions = Vector3.Scale(playerDimensions, transform.localScale);
         playerRadius = playerDimensions.x / 2f;
     }
     void Start()
@@ -102,6 +103,7 @@ public class Player : MonoBehaviour
     }
     public void TeleportInstant(Vector3 worldSpacePosition, Vector3 worldSpaceEulerAngles = default)
     {
+        Grapple.instance.PlayerTeleported(worldSpacePosition, worldSpaceEulerAngles);
         transform.position = worldSpacePosition;
         if (worldSpaceEulerAngles != default) { LookSet(worldSpaceEulerAngles); }
     }

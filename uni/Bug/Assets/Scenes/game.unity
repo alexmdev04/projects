@@ -878,7 +878,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh74410
+  m_Name: pb_Mesh51678
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2435,8 +2435,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95a9dad381e26f64b9ffa178aa3bef32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  levelRootPrefab: {fileID: 1447306917864900821, guid: c4af796e46181cd439565115b359fac8,
+    type: 3}
   menuLevel: {fileID: 2044136788}
-  menuLevelStartPosition: {x: 0, y: 0, z: 0}
+  menuLevelStartPosition: {x: 0, y: 6.25, z: -0.875}
   skipTutorials: 1
   levelLoaded:
     m_PersistentCalls:
@@ -3432,7 +3434,7 @@ MonoBehaviour:
   playerRotation: 0
   grappleDestinationMarker: {fileID: 898069083}
   ammoState: 0
-  maxDistance: 30
+  maxDistance: 40
   distanceFromWall: 0.1
   moveSpeed: 40
   rotateSpeed: 1
@@ -4368,7 +4370,7 @@ GameObject:
   - component: {fileID: 2044136790}
   - component: {fileID: 2044136791}
   m_Layer: 0
-  m_Name: Level-1
+  m_Name: menuLevel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

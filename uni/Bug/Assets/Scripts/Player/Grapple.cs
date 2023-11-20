@@ -47,6 +47,10 @@ public class Grapple : MonoBehaviour
     bool 
         movementActive,
         grappleCancelled;
+    Vector3
+        targetPosition;
+    Quaternion
+        targetRotation;
     [HideInInspector] public UnityEvent 
         grappleFired = new(),
         grappleFinished = new();
@@ -58,7 +62,9 @@ public class Grapple : MonoBehaviour
     }
     void Update()
     {
-        
+        debugTargetPosition = targetPosition;
+        debugTargetRotation = targetRotation.eulerAngles;
+        GrapplePlayerMovement();
     }
     /// <summary>
     /// The main code loop of the grapple, runs while the grapple button is held
@@ -92,7 +98,7 @@ public class Grapple : MonoBehaviour
     void GrapplePointValidCheck() 
     { 
         // the sphere overlap radius must be slightly bigger than the player to make sure the grapple point surface is collided with
-        Vector3 targetPosition = hit1.point + hit1.normal * (Player.instance.playerRadius + distanceFromWall);
+        targetPosition = hit1.point + hit1.normal * (Player.instance.playerRadius + distanceFromWall);
         grapplePointCheck = Physics.OverlapSphere(targetPosition, Player.instance.playerRadius + distanceFromWall + 0.01f, layerMask);
 
         // if the sphere collides with more than the wall the player is looking at then it is most likely invalid
@@ -121,37 +127,36 @@ public class Grapple : MonoBehaviour
         {
 			// lerp to the grapple destination and reflect rotation if enabled
 			playerMoving = true;
-            Quaternion targetRotation = Player.instance.transform.rotation.ReflectRotation(hit1.normal);
-            Vector3 targetPosition = hit1.point + hit1.normal * Player.instance.playerRadius;
-            debugTargetPosition = targetPosition;
-            debugTargetRotation = targetRotation.eulerAngles;
+            targetRotation = Player.instance.transform.rotation.ReflectRotation(hit1.normal);
+            targetPosition = hit1.point + hit1.normal * Player.instance.playerRadius;
             grappleFired.Invoke();
-            StartCoroutine(GrapplePlayerMovement(targetPosition, targetRotation));
         }
     }
     /// <summary>
-    /// Moves the player towards the target position and rotation, this is a Coroutine.
+    /// Moves the player towards the target position and rotation
     /// </summary>
-    /// <param name="targetPosition"></param>
-    /// <param name="targetRotation"></param>
-    /// <returns></returns>
-    public IEnumerator GrapplePlayerMovement(Vector3 targetPosition, Quaternion targetRotation)
+    public void GrapplePlayerMovement()
     {
+        if (!playerMoving) { return; }
         if (grappleDestinationMarker.activeSelf) { grappleDestinationMarker.transform.position = targetPosition; }
         distanceTravelled = Vector3.Distance(Player.instance.transform.position, targetPosition);
-        do
-        {
-            Player.instance.transform.position = Vector3.MoveTowards(Player.instance.transform.position, targetPosition, Time.deltaTime * moveSpeed);
-            if (playerRotation) { Player.instance.LookSet(Quaternion.Lerp(Player.instance.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed).eulerAngles); }
-            debugDistanceToTargetPosition = Vector3.Distance(Player.instance.transform.position, targetPosition);
-            yield return new WaitForEndOfFrame();
-        }
-        while (Vector3.Distance(Player.instance.transform.position, targetPosition) > 0f);
-        Player.instance.transform.position = targetPosition;
-        if (playerRotation) { Player.instance.LookSet(targetRotation.eulerAngles); }
+        Player.instance.transform.position = Vector3.MoveTowards(Player.instance.transform.position, targetPosition, Time.deltaTime * moveSpeed);
+        //if (playerRotation) { Player.instance.LookSet(Quaternion.Lerp(Player.instance.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed).eulerAngles); }
+        debugDistanceToTargetPosition = Vector3.Distance(Player.instance.transform.position, targetPosition);
+        if (Vector3.Distance(Player.instance.transform.position, targetPosition) == 0) { GrapplePlayerMovementFinished(); }
+    }
+    void GrapplePlayerMovementFinished()
+    {
         playerMoving = false;
-        grappleFinished.Invoke();
         distanceTravelled = 0;
+        grappleFinished.Invoke();
+    }
+    public void PlayerTeleported(Vector3 position, Vector3 eulerAngles = default)
+    {
+        playerMoving = false;
+        targetPosition = position;
+        if (eulerAngles != default) { targetRotation = Quaternion.Euler(eulerAngles); }
+        GrapplePointReset();
     }
     //public bool GrappleAmmoCheck() // change to check level for ammo
     //{
@@ -185,7 +190,7 @@ public class Grapple : MonoBehaviour
     public void Cancel()
     {
         grappleCancelled = true;
-        grapplePoint.SetActive(false);
+        GrapplePointReset();
     }
     public void SetMovementActive(bool state)
     {

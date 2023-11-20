@@ -13,6 +13,7 @@ public class LevelLoader : MonoBehaviour
     public static LevelLoader instance { get; private set; }
     public Level levelCurrent { get; private set; }
     public bool inLevel { get; private set; }
+    public GameObject levelRootPrefab;
     public GameObject menuLevel;
     [SerializeField] Vector3 menuLevelStartPosition;
     [SerializeField] bool skipTutorials;
@@ -24,24 +25,25 @@ public class LevelLoader : MonoBehaviour
         instance = this;
         uiMenuLevel = menuLevel.GetComponent<uiMenuLevel>();
         uiMenuLevel.skipTutorial = skipTutorials;
+        levelLoaded.AddListener(delegate { inLevel = true; });
     }   
     void Start()
     {
 #if UNITY_EDITOR
         MenuLevelState(true);
         if (unloadAllLevelScenesOnStart) { UnloadAllLevelScenesOnStart(); }
-        int tutorialComplete = PlayerPrefs.GetInt("tutorialComplete", 0);
-        if (tutorialComplete == 0)
-        {
-            StartCoroutine(uiMenuLevel.TutorialStart());
-        }
+        //int tutorialComplete = PlayerPrefs.GetInt("tutorialComplete", 0);
+        //if (tutorialComplete == 0)
+        //{
+        //    StartCoroutine(uiMenuLevel.TutorialStart());
+        //}
 #endif
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.F5)) { ChangeLevel("Level0"); }
-        inLevel = levelCurrent != null;
+        //inLevel = levelCurrent != null;
     }
     /// <summary>
     /// Changes to a new level by unloading the current level and loading the given level
@@ -50,6 +52,7 @@ public class LevelLoader : MonoBehaviour
     /// <param name="levelDifficulty"></param>
     public void ChangeLevel(string levelAssetKey, Level.levelDifficultiesEnum levelDifficulty = Level.levelDifficultiesEnum.normal)
     {
+        inLevel = false;
         if (levelCurrent != null)
         {
             levelCurrent.Unload();
@@ -103,8 +106,12 @@ public class LevelLoader : MonoBehaviour
     {
 
     }
+    /// <summary>
+    /// Unloads the currently loaded level and returns to the main menu
+    /// </summary>
     public void UnloadLevelCurrent()
     {
+        inLevel = false;
         if (levelCurrent != null)
         {
             levelCurrent.Unload();
@@ -132,7 +139,11 @@ public class LevelLoader : MonoBehaviour
     public void MenuLevelState(bool state, bool notify = false)
     {
         menuLevel.SetActive(state);
-        if (state && notify) { uiMessage.instance.New("Returned to main menu"); }
+        if (state)
+        {
+            if (notify) { uiMessage.instance.New("Returned to main menu"); }
+            Player.instance.TeleportInstant(menuLevelStartPosition);
+        }
     }
 
     #region Unload all level scenes on start if in editor

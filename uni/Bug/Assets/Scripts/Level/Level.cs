@@ -14,33 +14,43 @@ public class Level : MonoBehaviour
         normal,
         hard
     }
-    [System.Serializable] public struct difficultySpecificValues
+    [System.Serializable] public struct DifficultySpecificValues
     {
         public float grappleMaxDistance;
         public List<LevelObjective> objectives;
     }
-    public difficultySpecificValues easyValues;
-    public difficultySpecificValues normalValues;
-    public difficultySpecificValues hardValues;
-    public difficultySpecificValues currentValues { get; private set; }
+    [System.Serializable] public struct Section
+    {
+        public GameObject parent;
+        [Tooltip("The player will be teleported here when the section is started")] public GameObject playerStartPos;
+        public LevelGoal goal;
+    }
+
     [Header("Level Attributes")]
     public string assetKey;
     public string inGameName;
-    public int levelNumber;
     public levelDifficultiesEnum levelDifficulty = levelDifficultiesEnum.normal;
-    public float grappleMaxDistance = 30f;
-    [SerializeField] [Tooltip("The player will be teleported here when the level is started, in local space by default")] Vector3 playerStartPos;
-    [SerializeField] bool playerStartPosWorldSpace;
+
+    [Header("Difficulties")]
+    public DifficultySpecificValues easyValues;
+    public DifficultySpecificValues normalValues;
+    public DifficultySpecificValues hardValues;
+    public DifficultySpecificValues currentValues { get; private set; }
+
     [Header("References")]
-    [SerializeField] List<GameObject> levelSectionParents;
-    public LevelGoal goal;
+    [SerializeField] List<Section> sections = new();
+
+    public Section currentSection { get; private set; }
+    [HideInInspector] public string levelNumber;
 
     void Awake()
     {
-        goal = GetComponentInChildren<LevelGoal>();
+        // levelNumber is only used for the radar, if the assetKey format is Level1 then it will be 1, otherwise it will be the full asset key
+        levelNumber = assetKey[..4].ToLower() == "level" ? (assetKey.ToCharArray()[5..].AllCharsAreDigits() ? assetKey.ToCharArray()[5..].ToString() : assetKey) : assetKey;
     }
-    void Start()
+    void Start() // sets the difficulty, currentSection to the first section, activates all objectives and enables grapple movement
     {
+        Debug.Log(assetKey + " Start()");
         switch (levelDifficulty)
         {
             case levelDifficultiesEnum.easy:
@@ -59,21 +69,18 @@ public class Level : MonoBehaviour
                     break;
                 }
         }
-        foreach (LevelObjective obj in currentValues.objectives)
-        {
-            obj.Start();
-        }
+        currentSection = sections[0];
+        SectionStart(0);
+        foreach (LevelObjective obj in currentValues.objectives) { obj.Start(); }
         Grapple.instance.SetMovementActive(true);
-        Grapple.instance.maxDistance = grappleMaxDistance;
-        Player.instance.TeleportInstant(playerStartPosWorldSpace ? playerStartPos : transform.TransformPoint(playerStartPos));
     }
-    void Update()
+    void Update() // checks if the goal should be unlocked
     {
-        goal.goalUnlocked = validateObjectives();
+        currentSection.goal.goalUnlocked = ObjectivesValidate();
     }
-    bool validateObjectives()
+    bool ObjectivesValidate()
     {
-        List<bool> bools = new List<bool>();
+        List<bool> bools = new();
         foreach (LevelObjective objective in currentValues.objectives) 
         {
             objective.currentValueUpdate();
@@ -84,10 +91,6 @@ public class Level : MonoBehaviour
         }
         return bools.All(x => x);
     }
-    public void debugToggleGoal()
-    {
-        goal.goalUnlocked = !goal.goalUnlocked;
-    }
     public void debugSkipToSection()
     {
 
@@ -95,11 +98,11 @@ public class Level : MonoBehaviour
     public StringBuilder debugGetLevelStats()
     {
         return new StringBuilder()
-            .Append("<u>Level;</u>")
+            .Append("<u>Level;</u>\ninLevel = ").Append(LevelLoader.instance.inLevel.ToString())
             .Append("\nassetKey = ").Append(assetKey)
             .Append("\ninGameName = ").Append(inGameName)
             .Append("\nobjectives; ").Append(debugGetObjectives())
-            .Append("\nplayerStartPos = ").Append(playerStartPos.ToStringBuilder());
+            .Append("\nplayerStartPos = ").Append(currentSection.playerStartPos.transform.position.ToStringBuilder());
     }
     StringBuilder debugGetObjectives()
     {
@@ -109,11 +112,43 @@ public class Level : MonoBehaviour
     }
     public void Unload()
     {
-        Debug.Log("stopping objectives in " + assetKey);
+        Debug.Log("Unloading" + assetKey);
         foreach (LevelObjective objective in currentValues.objectives) { objective.Stop(); }
-        foreach (uiObjective uiObjective in ui.instance.uiObjectives)
+        ui.instance.uiObjectivesDestroy();
+    }
+    void End()
+    {
+        uiMessage.instance.New("end of " + assetKey);
+        uiDebugConsole.instance.InternalCommandCall("menu");
+    }
+    public void GoalReached()
+    {
+        if (sections.Count == 0)
         {
-            Destroy(uiObjective);
+            End();
         }
+        else
+        {
+            SectionEnd();
+        }
+    }
+    void SectionEnd()
+    {
+        if (sections.IndexOf(currentSection) == sections.Count - 1)
+        {
+            End();
+        }
+        else
+        {
+            SectionStart(sections.IndexOf(currentSection) + 1);            
+        }
+    }
+    void SectionStart(int index)
+    {
+        currentSection = sections[index];
+        foreach (Section section in sections) { section.parent.SetActive(false); }
+        sections[index].parent.SetActive(true);
+        Grapple.instance.maxDistance = currentValues.grappleMaxDistance;
+        Player.instance.TeleportInstant(currentSection.playerStartPos != null ? currentSection.playerStartPos.transform.position : transform.TransformPoint(Vector3.zero));
     }
 }

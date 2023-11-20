@@ -32,11 +32,10 @@ public class LevelGoal : MonoBehaviour
     }
     void OnTriggerEnter(Collider collision)
     {
-        Debug.Log(collision.gameObject.name);
         if (collision.gameObject.GetComponent<Player>() != null)
         {
             uiMessage.instance.New("Goal Reached!");
-            uiDebugConsole.instance.InternalCommandCall("menu");
+            LevelLoader.instance.levelCurrent.GoalReached();
         }
     }
 }

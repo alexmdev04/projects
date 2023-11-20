@@ -19,7 +19,7 @@ public class uiMenuLevel : MonoBehaviour
     }
     void Start()
     {
-
+        if (skipTutorial) { SkipTutorials(); }
     }
     void Update()
     {

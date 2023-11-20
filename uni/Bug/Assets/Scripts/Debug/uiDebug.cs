@@ -63,6 +63,8 @@ public class uiDebug : MonoBehaviour
         return new StringBuilder()
             // grapple stats
             .Append("<u>Grapple;</u>")
+            .Append("\nmaxDistance = ").Append(Grapple.instance.maxDistance.ToString())
+            .Append("\nplayerMoving = ").Append(Grapple.instance.playerMoving.ToString())
             .Append("\ngrapplePointValid = ").Append(Grapple.instance.grapplePointValid.ToString())
             .Append("\ngrapplePointCheck;\n  collisions = ").Append(((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.Length : 0).ToString())
             .Append(", names = ").Append((Grapple.instance.grapplePointCheck != null) ? Grapple.instance.grapplePointCheck.ToStringBuilder() : "n/a")
@@ -70,7 +72,7 @@ public class uiDebug : MonoBehaviour
             .Append("\ntargetRotation = ").Append(Grapple.instance.debugTargetRotation.ToStringBuilder())
             .Append("\ndistanceToTargetPosition = ").Append(Grapple.instance.debugDistanceToTargetPosition.ToString())
             // level stats
-            .Append("\n\n").Append((LevelLoader.instance.levelCurrent != null) ? LevelLoader.instance.levelCurrent.debugGetLevelStats().ToString() : "<u>Level</u>\nNo level loaded");
+            .Append("\n\n").Append((LevelLoader.instance.levelCurrent != null) ? LevelLoader.instance.levelCurrent.debugGetLevelStats().ToString() : "<u>Level;</u>\ninLevel = ").Append(LevelLoader.instance.inLevel.ToString());
     }
     void GetDebugNotes() // scans all loaded scenes and their root game objects for uiDebugNote components and combines them all
     {
@@ -124,9 +126,6 @@ public class uiDebug : MonoBehaviour
 
         // scroll to change hook distance
         Grapple.instance.maxDistance += Input.mouseScrollDelta.y;
-
-        // toggle goal state
-        if (Input.GetKeyDown(KeyCode.F4)) { LevelLoader.instance.levelCurrent.debugToggleGoal(); }
 
         // enables debug notes on screen
         if (Input.GetKeyDown(KeyCode.Insert)) { showAllNotes = true; }

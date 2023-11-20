@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -78,9 +80,15 @@ public static class Extensions
     public static StringBuilder ToStringBuilder(this Collider[] colliders, string ifNullText = "n/a", string ifEmptyText = "n/a")
     {
         StringBuilder a = new();
-        if (Grapple.instance.grapplePointCheck == null) { return a.Append(ifNullText); }
-        if (Grapple.instance.grapplePointCheck.Length == 0) { return a.Append(ifEmptyText); }
-        foreach (Collider collider in Grapple.instance.grapplePointCheck) { a.Append(collider.gameObject.name).Append(", "); }
+        if (colliders == null) { return a.Append(ifNullText); }
+        if (colliders.Length == 0) { return a.Append(ifEmptyText); }
+        foreach (Collider collider in colliders) { if (collider != null) { a.Append(collider.gameObject.name).Append(", "); } }
         return a;
+    }
+    public static bool AllCharsAreDigits(this char[] chars)
+    {
+        List<bool> isDigitBools = new();
+        foreach (char _char in chars) { isDigitBools.Add(char.IsDigit(_char)); }
+        return isDigitBools.All(x => x);
     }
 }
