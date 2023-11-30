@@ -13,7 +13,7 @@ public class uiDebugConsole : MonoBehaviour
     public static uiDebugConsole instance { get; private set; }
     TMP_InputField inputField;
     [SerializeField] bool outputCommandInputs;
-    public int previousInputsCurrentIndex = 0;
+    public int previousInputsIndex = 0;
     public List<string> previousInputs = new() { string.Empty };
     string command;
     string data1;
@@ -24,11 +24,6 @@ public class uiDebugConsole : MonoBehaviour
         //public string data2;
         //public string data3;
     }
-    string[] levels = new string[2]
-    {
-        "Level0",
-        "Level1"
-    };
     void Awake()
     {
         Vector3 newVector = new Vector3(x: 1, y: 2, z: 3);
@@ -236,20 +231,20 @@ public class uiDebugConsole : MonoBehaviour
     }
     void PreviousInput()
     {
-        if (previousInputsCurrentIndex == 0) { previousInputs[0] = inputField.text; }
+        if (previousInputsIndex == 0) { previousInputs[0] = inputField.text; }
         if (previousInputs.Count > 1)
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow) && previousInputsCurrentIndex < previousInputs.Count - 1)
+            if (Input.GetKeyDown(KeyCode.UpArrow) && previousInputsIndex < previousInputs.Count - 1)
             {
-                previousInputsCurrentIndex++;
-                inputField.text = previousInputs[previousInputsCurrentIndex];
+                previousInputsIndex++;
+                inputField.text = previousInputs[previousInputsIndex];
                 char[] inputFieldChars = inputField.text.ToCharArray();
                 inputField.stringPosition = inputFieldChars.ToList().IndexOf(inputFieldChars[^1]) + 1;
             }
-            if (Input.GetKeyDown(KeyCode.DownArrow) && previousInputsCurrentIndex > 0)
+            if (Input.GetKeyDown(KeyCode.DownArrow) && previousInputsIndex > 0)
             {
-                previousInputsCurrentIndex--;
-                inputField.text = previousInputs[previousInputsCurrentIndex];
+                previousInputsIndex--;
+                inputField.text = previousInputs[previousInputsIndex];
             }
         }
     }

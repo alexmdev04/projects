@@ -53,6 +53,7 @@ public class LevelLoader : MonoBehaviour
     public void ChangeLevel(string levelAssetKey, Level.levelDifficultiesEnum levelDifficulty = Level.levelDifficultiesEnum.normal)
     {
         inLevel = false;
+        ui.instance.uiFadeToBlack = true;
         if (levelCurrent != null)
         {
             levelCurrent.Unload();
@@ -89,6 +90,7 @@ public class LevelLoader : MonoBehaviour
         levelCurrent = levelCurrentSceneInstance.Scene.GetRootGameObjects()[0].GetComponent<Level>();
         MenuLevelState(false);
         uiMessage.instance.New(levelCurrent.assetKey + " - " + levelCurrent.inGameName + " loaded!");
+        ui.instance.uiFadeToBlack = false;
         levelLoaded.Invoke();
     }
     /// <summary>
@@ -130,7 +132,7 @@ public class LevelLoader : MonoBehaviour
     void UnloadSceneInstance(SceneInstance sceneInstance, string assetKey)
     {
         AsyncOperationHandle sceneInstanceUnload = Addressables.UnloadSceneAsync(sceneInstance, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
-        sceneInstanceUnload.Completed += delegate { uiMessage.instance.New("Unloaded " + assetKey); };
+        //sceneInstanceUnload.Completed += delegate { uiMessage.instance.New("Unloaded " + assetKey); };
     }
     /// <summary>
     /// Sets the menu level's active state

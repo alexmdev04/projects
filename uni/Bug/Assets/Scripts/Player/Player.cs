@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -8,13 +9,9 @@ public class Player : MonoBehaviour
 
     // instancing
     public static Player instance { get; private set; }
-    public LineRenderer lineRenderer {  get; private set; }
-
+    public LineRenderer lineRenderer { get; private set; }
     public int 
         targetFramerate;
-    float 
-        lookRotX, 
-        lookRotY;
     public Vector2 
         mouseRotation,
         mouseRotationMultiplier,
@@ -25,6 +22,8 @@ public class Player : MonoBehaviour
         lineRendererOffset = new Vector3(0f, -0.1f, 0f),
         playerDimensions = Vector3.one;
     public float playerRadius;
+    Vector2 playerEulerAngles;
+    [SerializeField] Light torch;
 
     void Awake()
     {
@@ -54,11 +53,11 @@ public class Player : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKey(KeyCode.Equals))
         {
             targetFramerate += 1;
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.Minus))
         {
             targetFramerate -= 1;
         }
@@ -68,13 +67,12 @@ public class Player : MonoBehaviour
     /// </summary>
     void Look()
     {
-        if (Grapple.instance.playerMoving) { return; }
-        mouseRotation *= mouseRotationMultiplier * lookSensitivity;
-        lookRotY += mouseRotation.x * Time.fixedDeltaTime;
-        lookRotX -= mouseRotation.y * Time.fixedDeltaTime;
-        lookRotX = Mathf.Clamp(lookRotX, -90f, 90f);
-        transform.eulerAngles = new(lookRotX, lookRotY, 0);
-        //Camera.main.transform.localEulerAngles = new(lookRotX, 0, 0);
+        mouseRotation = (mouseRotation * mouseRotationMultiplier) * lookSensitivity;
+        playerEulerAngles.x += mouseRotation.x * lookSensitivity.x;
+        playerEulerAngles.y += mouseRotation.y * lookSensitivity.y;
+        playerEulerAngles.y = Mathf.Clamp(playerEulerAngles.y, -90f, 90f);
+        transform.localRotation = Quaternion.AngleAxis(playerEulerAngles.x, Vector3.up) 
+                                * Quaternion.AngleAxis(playerEulerAngles.y, Vector3.left);
     }
     /// <summary>
     /// <para>Manually sets the rotation of the player</para>
@@ -83,20 +81,20 @@ public class Player : MonoBehaviour
     /// <param name="eulerAngles"></param>
     public void LookSet(Vector3 eulerAngles)
     {
-        lookRotX = eulerAngles.x;
-        lookRotY = eulerAngles.y;
+        playerEulerAngles.x = eulerAngles.x;
+        playerEulerAngles.y = eulerAngles.y;
     }
-    /// <summary>
-    /// <para>Manually sets the rotation of the player</para>
-    /// <para>Used instead of Player.instance.transform.rotation = Quaternion</para>
-    /// </summary>
-    /// <param name="quaternion"></param>
-    public void LookSet(Quaternion quaternion)
-    {
-        Vector3 eulerAngles = quaternion.eulerAngles;
-        lookRotX = eulerAngles.x;
-        lookRotY = eulerAngles.y;
-    }
+    ///// <summary>
+    ///// <para>Manually sets the rotation of the player</para>
+    ///// <para>Used instead of Player.instance.transform.rotation = Quaternion</para>
+    ///// </summary>
+    ///// <param name="quaternion"></param>
+    //public void LookSet(Quaternion quaternion)
+    //{
+    //    Vector3 eulerAngles = quaternion.eulerAngles;
+    //    lookRotX = eulerAngles.x;
+    //    lookRotY = eulerAngles.y;
+    //}
     public void BeginTutorial()
     {
 
@@ -105,10 +103,22 @@ public class Player : MonoBehaviour
     {
         Grapple.instance.PlayerTeleported(worldSpacePosition, worldSpaceEulerAngles);
         transform.position = worldSpacePosition;
-        if (worldSpaceEulerAngles != default) { LookSet(worldSpaceEulerAngles); }
+        playerEulerAngles = worldSpaceEulerAngles;
+        //if (worldSpaceEulerAngles != default) 
+        //{ 
+        //    LookSet(worldSpaceEulerAngles);
+        //}
     }
-    public void debugSetPosition()
+    public void debugToggleTorch()
     {
-
+        torch.gameObject.SetActive(!torch.gameObject.activeSelf);
+    }
+    public StringBuilder debugGetStats()
+    {
+        return new StringBuilder(uiDebug.str_playerTitle)
+            .Append(uiDebug.str_targetFramerate).Append(targetFramerate.ToString())
+            .Append(uiDebug.str_mouseRotation).Append(mouseRotation.ToStringBuilder()).Append(uiDebug.str_multiply).Append(mouseRotationMultiplier.ToStringBuilder())
+            .Append(uiDebug.str_lookSensitivity).Append(lookSensitivity.ToStringBuilder())
+            .Append(uiDebug.str_playerDimensions).Append(playerRadius);
     }
 }

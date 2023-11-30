@@ -6,6 +6,17 @@ using UnityEngine;
 
 public static class Extensions
 {
+    const string
+        ext_timeDays = "d ",
+        ext_timeHours = "h ",
+        ext_timeMinutes = "m ",
+        ext_timeSeconds = "s ",
+        ext_comma = ", ",
+        ext_leftBracket = "(",
+        ext_rightBracket = ")",
+        ext_notApplicable = "n/a",
+        ext_zeroSec = "0s";
+
     /// <summary>
     /// Sets this transform and all its children to the specified layer
     /// </summary>
@@ -33,10 +44,10 @@ public static class Extensions
     {
         TimeSpan ts = TimeSpan.FromSeconds((int)seconds);
         return
-            (ts.Days > 0 ? ts.Days.ToString() + "d " : "") +
-            (ts.Hours > 0 ? ts.Hours.ToString() + "h " : "") +
-            (ts.Minutes > 0 ? ts.Minutes.ToString() + "m " : "") +
-            (ts.Seconds > 0 ? ts.Seconds.ToString() + "s " : "0s");
+            (ts.Days > 0 ? ts.Days.ToString() + ext_timeDays : string.Empty) +
+            (ts.Hours > 0 ? ts.Hours.ToString() + ext_timeHours : string.Empty) +
+            (ts.Minutes > 0 ? ts.Minutes.ToString() + ext_timeMinutes : string.Empty) +
+            (ts.Seconds > 0 ? ts.Seconds.ToString() + ext_timeSeconds : ext_zeroSec);
     }
     /// <summary>
     /// Calculates the greatest common denominator of a and b
@@ -61,14 +72,25 @@ public static class Extensions
     /// <summary>
     /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
     /// </summary>
-    /// <param name="vector"></param>
+    /// <param name="vector3"></param>
     /// <returns></returns>
-    public static StringBuilder ToStringBuilder(this Vector3 vector)
+    public static StringBuilder ToStringBuilder(this Vector3 vector3)
     {
-        return new StringBuilder().Append("(")
-            .Append(vector.x.ToString()).Append(", ")
-            .Append(vector.y.ToString()).Append(", ")
-            .Append(vector.z.ToString()).Append(")");
+        return new StringBuilder().Append(ext_leftBracket)
+            .Append(vector3.x.ToString()).Append(ext_comma)
+            .Append(vector3.y.ToString()).Append(ext_comma)
+            .Append(vector3.z.ToString()).Append(ext_rightBracket);
+    }
+    /// <summary>
+    /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
+    /// </summary>
+    /// <param name="vector2"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Vector2 vector2)
+    {
+        return new StringBuilder().Append(ext_leftBracket)
+            .Append(vector2.x.ToString()).Append(ext_comma)
+            .Append(vector2.y.ToString()).Append(ext_rightBracket);
     }
     /// <summary>
     /// Converts an array of Colliders to a StringBuilder containing a comma-separated list of all the Collider's GameObject's names
@@ -77,12 +99,12 @@ public static class Extensions
     /// <param name="ifNullText"></param>
     /// <param name="ifEmptyText"></param>
     /// <returns></returns>
-    public static StringBuilder ToStringBuilder(this Collider[] colliders, string ifNullText = "n/a", string ifEmptyText = "n/a")
+    public static StringBuilder ToStringBuilder(this Collider[] colliders, string ifNullText = ext_notApplicable, string ifEmptyText = ext_notApplicable)
     {
         StringBuilder a = new();
         if (colliders == null) { return a.Append(ifNullText); }
         if (colliders.Length == 0) { return a.Append(ifEmptyText); }
-        foreach (Collider collider in colliders) { if (collider != null) { a.Append(collider.gameObject.name).Append(", "); } }
+        foreach (Collider collider in colliders) { if (collider != null) { a.Append(collider.gameObject.name).Append(ext_comma); } }
         return a;
     }
     public static bool AllCharsAreDigits(this char[] chars)

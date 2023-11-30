@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,6 +16,7 @@ public class Grapple : MonoBehaviour
     public Vector3 debugTargetPosition { get; private set; }
     public Vector3 debugTargetRotation { get; private set; }
     public float debugDistanceToTargetPosition { get; private set; }
+
     public GameObject grappleDestinationMarker;
     public enum ammoStateEnum
     {
@@ -24,12 +26,12 @@ public class Grapple : MonoBehaviour
     }
     public ammoStateEnum 
         ammoState = ammoStateEnum.infinite;
-    public float 
-        maxDistance = 500f, 
+    [SerializeField] float
+        maxDistance = 500f,
         distanceFromWall = 0.1f,
         moveSpeed = 1f,
-        rotateSpeed = 1f, 
-        distanceTravelled;
+        rotateSpeed = 1f;
+    [HideInInspector] public float currentDistance, distanceTravelled;
     [SerializeField] GameObject 
         grapplePoint;
     [SerializeField] LayerMask 
@@ -40,20 +42,19 @@ public class Grapple : MonoBehaviour
     //    ammoUsesCurrent,
     //    ammoUsesMax;
     RaycastHit 
-        hit1, 
-        hit2;
+        hit1;
     MeshRenderer 
         grapplePointRenderer;
     bool 
         movementActive,
-        grappleCancelled;
+        cancelled;
     Vector3
         targetPosition;
     Quaternion
         targetRotation;
     [HideInInspector] public UnityEvent 
-        grappleFired = new(),
-        grappleFinished = new();
+        fired = new(),
+        finished = new();
 
     void Awake()
     {
@@ -66,6 +67,10 @@ public class Grapple : MonoBehaviour
         debugTargetRotation = targetRotation.eulerAngles;
         GrapplePlayerMovement();
     }
+    public void GrappleDistanceSet(float value)
+    {
+        maxDistance = value;
+    }
     /// <summary>
     /// The main code loop of the grapple, runs while the grapple button is held
     /// </summary>
@@ -73,7 +78,7 @@ public class Grapple : MonoBehaviour
     {
         // currently the grappling is disabled until the player reaches the grapple point
         if (playerMoving) { return; } 
-        if (grappleCancelled) { return; }
+        if (cancelled) { return; }
         // grapplePoint is the holographic representation of the player while holding the grapple button
         // green = valid grapple point, red = invalid grapple point
         grapplePoint.SetActive(true);
@@ -105,6 +110,7 @@ public class Grapple : MonoBehaviour
         // however this could cause overlapped colliders to be invalid locations
         grapplePointValid = !(grapplePointCheck.Length > 1); 
         grapplePoint.transform.position = targetPosition;
+        currentDistance = Vector3.Distance(Player.instance.transform.position, hit1.point);
         debugTargetPosition = targetPosition;
         if (uiDebug.instance.debugMode)
         {
@@ -121,7 +127,7 @@ public class Grapple : MonoBehaviour
         // currently the grappling is disabled until the player reaches the grapple point
         if (playerMoving) { return; }
         grapplePoint.SetActive(false);
-        if (grappleCancelled) { grappleCancelled = false; return; }
+        if (cancelled) { cancelled = false; return; }
         if (!movementActive) { return; }
         if (grapplePointValid)
         {
@@ -129,7 +135,7 @@ public class Grapple : MonoBehaviour
 			playerMoving = true;
             targetRotation = Player.instance.transform.rotation.ReflectRotation(hit1.normal);
             targetPosition = hit1.point + hit1.normal * Player.instance.playerRadius;
-            grappleFired.Invoke();
+            fired.Invoke();
         }
     }
     /// <summary>
@@ -140,16 +146,17 @@ public class Grapple : MonoBehaviour
         if (!playerMoving) { return; }
         if (grappleDestinationMarker.activeSelf) { grappleDestinationMarker.transform.position = targetPosition; }
         distanceTravelled = Vector3.Distance(Player.instance.transform.position, targetPosition);
+        currentDistance = Vector3.Distance(Player.instance.transform.position, hit1.point);
         Player.instance.transform.position = Vector3.MoveTowards(Player.instance.transform.position, targetPosition, Time.deltaTime * moveSpeed);
         //if (playerRotation) { Player.instance.LookSet(Quaternion.Lerp(Player.instance.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed).eulerAngles); }
-        debugDistanceToTargetPosition = Vector3.Distance(Player.instance.transform.position, targetPosition);
+        debugDistanceToTargetPosition = distanceTravelled;
         if (Vector3.Distance(Player.instance.transform.position, targetPosition) == 0) { GrapplePlayerMovementFinished(); }
     }
     void GrapplePlayerMovementFinished()
     {
         playerMoving = false;
         distanceTravelled = 0;
-        grappleFinished.Invoke();
+        finished.Invoke();
     }
     public void PlayerTeleported(Vector3 position, Vector3 eulerAngles = default)
     {
@@ -189,7 +196,7 @@ public class Grapple : MonoBehaviour
     }
     public void Cancel()
     {
-        grappleCancelled = true;
+        cancelled = true;
         GrapplePointReset();
     }
     public void SetMovementActive(bool state)
@@ -203,5 +210,22 @@ public class Grapple : MonoBehaviour
     public void Disable()
     {
         
+    }
+    public StringBuilder debugGetStats()
+    {
+        return new StringBuilder(uiDebug.str_grappleTitle)
+            .Append(uiDebug.str_maxDistance).Append(maxDistance.ToString())
+            .Append(uiDebug.str_currentDistance).Append(currentDistance.ToString())
+            .Append(uiDebug.str_playerMoving).Append(playerMoving.ToString())
+            .Append(uiDebug.str_grapplePointValid).Append(grapplePointValid.ToString())
+            .Append(uiDebug.str_grapplePointCheck).Append(((grapplePointCheck != null) ? grapplePointCheck.Length : 0).ToString())
+            .Append(uiDebug.str_grapplePointCheckNames).Append((grapplePointCheck != null) ? grapplePointCheck.ToStringBuilder() : uiDebug.str_notApplicable)
+            .Append(uiDebug.str_targetPosition).Append(debugTargetPosition.ToStringBuilder())
+            .Append(uiDebug.str_targetRotation).Append(debugTargetRotation.ToStringBuilder())
+            .Append(uiDebug.str_distanceToTargetPosition).Append(debugDistanceToTargetPosition.ToString());
+    }
+    public void debugMaxDistanceEdit(float value)
+    {
+        maxDistance += value;
     }
 }

@@ -6,7 +6,7 @@ using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-    
+
 [CreateAssetMenu(fileName = "NewLevelObjective", menuName = "Level/Objective")]
 public class LevelObjective : ScriptableObject
 {
@@ -28,19 +28,21 @@ public class LevelObjective : ScriptableObject
     [SerializeField] objectiveCompletionTypes completionType;
     public bool requiredForCompletion;
     [SerializeField] bool uiValueCountDown;
-    [SerializeField] [Tooltip("The player must be at this value to complete the objective")] double completionValue;
+    [SerializeField][Tooltip("The player must be at this value to complete the objective")] double completionValue;
+    public bool completed { get; private set; }
     public double currentValue
     {
         get
         {
             return _currentValue;
         }
-        set
+        private set
         {
             _currentValue = value;
+            completed = isCompleted();
             if (LevelLoader.instance.inLevel)
             {
-                uiObjective.Refresh(uiGetText());
+                uiObjectiveRefresh();
             }
         }
     }
@@ -48,6 +50,7 @@ public class LevelObjective : ScriptableObject
     [SerializeField] [Tooltip("When the level ends this score will be awarded if the objective is complete")] double scoreAwarded;
     [HideInInspector] public uiObjective uiObjective;
     public bool successfulStart = false;
+
     public void Start()
     {
         currentValue = 0;
@@ -56,12 +59,56 @@ public class LevelObjective : ScriptableObject
             case objectiveTypes.grappleUses:
                 {
                     completionValue = (int)completionValue;
-                    Grapple.instance.grappleFired.AddListener(delegate { currentValueEdit(1); });
+                    Grapple.instance.finished.AddListener(currentValueEditAuto);
                     break;
                 }
             case objectiveTypes.grappleDistance:
                 {
-                    Grapple.instance.grappleFinished.AddListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); });
+                    Grapple.instance.finished.AddListener(currentValueEditAuto);
+                    break;
+                }
+            case objectiveTypes.timeLimit:
+                {
+                    break;
+                }
+            case objectiveTypes.alertLevel:
+                {
+                    break;
+                }
+        }
+    }
+    public void Stop()
+    {
+        Grapple.instance.fired.RemoveListener(currentValueEditAuto);
+        Grapple.instance.finished.RemoveListener(currentValueEditAuto);
+    }
+    void currentValueSet(double value)
+    {
+        currentValue = value;
+    }
+    void currentValueEdit(double value)
+    {
+
+        if (currentValue >= completionValue)
+        {
+            Debug.Log(name + " completion value reached (" + completionValue + ")");
+            currentValue = completionValue;
+            return;
+        }
+        currentValue += value;
+    }
+    void currentValueEditAuto() // remove listener does not work when taking an argument
+    {
+        switch (type)
+        {
+            case objectiveTypes.grappleUses:
+                {
+                    currentValueEdit(1);
+                    break;
+                }
+            case objectiveTypes.grappleDistance:
+                {
+                    currentValueEdit(Grapple.instance.distanceTravelled);
                     break;
                 }
             case objectiveTypes.timeLimit:
@@ -74,25 +121,6 @@ public class LevelObjective : ScriptableObject
                 }
 
         }
-    }
-    public void Stop()
-    {
-        Grapple.instance.grappleFired.RemoveListener(delegate { currentValueEdit(1); });
-        Grapple.instance.grappleFinished.RemoveListener(delegate { currentValueEdit(Grapple.instance.distanceTravelled); });
-    }
-    void currentValueSet(double value)
-    {
-        currentValue = value;
-    }
-    void currentValueEdit(double value)
-    {
-        if (currentValue >= completionValue)
-        {
-            Debug.Log(name + " completion value reached (" + completionValue + ")");
-            currentValue = completionValue;
-            return;
-        }
-        currentValue += value;
     }
     public void currentValueUpdate()
     {
@@ -132,55 +160,15 @@ public class LevelObjective : ScriptableObject
                     break;
                 }
         }
-
-
-        uiObjective.objectiveCompleted = value;
         return value;
     }
-    public string uiGetText()
+    public void uiObjectiveRefresh()
     {
-        string text = name;
-        string customReturn = string.Empty;
-        string unit = string.Empty;
-        switch (type)
-        {
-            case objectiveTypes.grappleUses:
-                {
-                    text = "Grapple Uses = ";
-                    break;
-                }
-            case objectiveTypes.grappleDistance:
-                {
-                    text = "Grapple Distance = ";
-                    unit = "m";
-                    break;
-                }
-            case objectiveTypes.timeLimit:
-                {
-                    text = "Time = ";
-                    customReturn = (completionValue - currentValue).ConvertTime() + " left";
-                    break;
-                }
-        }
-        return text += (customReturn != string.Empty) ? customReturn : 
-            (uiValueCountDown ? completionValue - currentValue + unit + " left" : currentValue + unit + " / " + completionValue + unit);
+        uiObjective.Refresh(type, currentValue, completionValue, uiValueCountDown);
     }
     public StringBuilder debugGetObjective()
     {
-        return new StringBuilder("\n").Append(name).Append(" - ").Append(type).Append(" = ").Append(currentValue).Append(" / ").Append(completionValue);
+        return new StringBuilder(uiDebug.str_NewLine).Append(name).Append(uiDebug.str_dash).Append(type).Append(uiDebug.str_equals).Append(currentValue).Append(uiDebug.str_divide).Append(completionValue);
     }
-    //private float FloatFromAxis(bool positive, bool negative) =>
-    //    (positive, negative) switch
-    //    {
-    //        (true, false) => 1f,
-    //        (false, true) => -1f,
-    //        _ => 0f
-    //    };
 
-    //private Vector2 GetInput()
-    //{
-    //    float horizontal = FloatFromAxis(Input.GetKey(KeyCode.A), Input.GetKey(KeyCode.D));
-    //    float vertical = FloatFromAxis(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S));
-    //    return new Vector2(horizontal, vertical);
-    //}
 } 

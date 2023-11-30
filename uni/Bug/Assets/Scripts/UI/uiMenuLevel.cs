@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class uiMenuLevel : MonoBehaviour
 {
-    public static uiMenuLevel instance { get; private set; }
     [SerializeField] GameObject uiWM;
     public bool skipTutorial;
     int tutorialPlayerMoved;
@@ -15,7 +14,7 @@ public class uiMenuLevel : MonoBehaviour
     [SerializeField] LayerMask layerMask;
     void Awake()
     {
-        instance = this;
+
     }
     void Start()
     {
@@ -131,7 +130,7 @@ public class uiMenuLevel : MonoBehaviour
             uiMessage.instance.New("Use what you've learned to move 3 times.");
 
             Grapple.instance.SetMovementActive(true);
-            Grapple.instance.grappleFinished.AddListener(TutorialPlayerMoved);
+            Grapple.instance.finished.AddListener(TutorialPlayerMoved);
 
             float reminderClockMovement = 0f;
             do
@@ -145,7 +144,7 @@ public class uiMenuLevel : MonoBehaviour
                 yield return new WaitForEndOfFrame();
             }
             while (tutorialPlayerMoved < 3);
-            Grapple.instance.grappleFinished.RemoveListener(TutorialPlayerMoved);
+            Grapple.instance.finished.RemoveListener(TutorialPlayerMoved);
             uiMessage.instance.New("Good job!");
 
             yield return new WaitForSeconds(tutorialTextWaitTime);

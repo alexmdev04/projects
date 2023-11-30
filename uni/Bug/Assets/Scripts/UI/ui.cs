@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.PlayerLoop;
+using UnityEngine.UI;
 
 public class ui : MonoBehaviour
 {
@@ -11,9 +12,12 @@ public class ui : MonoBehaviour
     public uiGrapple grapple { get; private set; }
     public uiRadar radar { get; private set; }
     public uiCrosshair crosshair { get; private set; }
+    public uiMenuLevel menuLevel { get; private set; }
     public static UnityEvent menuChanged { get; private set; }
-
-
+    public List<uiObjective> 
+        uiObjectives;
+    public bool 
+        uiFadeToBlack;
     [SerializeField] TextMeshProUGUI 
         uiLevelNum,
         uiSectionNum;
@@ -22,7 +26,13 @@ public class ui : MonoBehaviour
         uiObjectivesParent;
     [SerializeField] GameObject[] 
         uiObjs;
-    public List<uiObjective> uiObjectives;
+    [SerializeField] Image 
+        uiFade;
+    [SerializeField] float 
+        uiFadeInSpeed,
+        uiFadeOutSpeed;
+
+
     public enum menus
     {
         inGame,
@@ -44,6 +54,10 @@ public class ui : MonoBehaviour
         }
     }
     public static menus _currentMenu { get; private set; } = menus.main;
+    const string
+        uiLevelNumText = "Level ",
+        uiSectionNumText = "Section ",
+        uiLevelNumDashText = "-";
     void Awake()
     {
         instance = this;
@@ -59,6 +73,7 @@ public class ui : MonoBehaviour
     void Update()
     {
         radar.gameObject.SetActive(LevelLoader.instance.inLevel);
+        uiFadeUpdate();
     }
     void Refresh()
     {
@@ -97,7 +112,7 @@ public class ui : MonoBehaviour
         {
             for (int i = 0; i < LevelLoader.instance.levelCurrent.currentValues.objectives.Count; i++)
             {
-                uiObjectives[i].Refresh(LevelLoader.instance.levelCurrent.currentValues.objectives[i].uiGetText());
+                LevelLoader.instance.levelCurrent.currentValues.objectives[i].uiObjectiveRefresh();
             }
         }
     }
@@ -106,14 +121,34 @@ public class ui : MonoBehaviour
     /// </summary>
     void uiLevelNumUpdate()
     {
-        uiLevelNum.text = LevelLoader.instance.inLevel ? "Level " + LevelLoader.instance.levelCurrent.levelNumber + "-" + LevelLoader.instance.levelCurrent.levelDifficulty.ToString().ToUpper().ToCharArray()[0] : "";
+        uiLevelNum.text = LevelLoader.instance.inLevel ? uiLevelNumText + LevelLoader.instance.levelCurrent.levelNumber + uiLevelNumDashText + LevelLoader.instance.levelCurrent.levelDifficulty.ToString().ToUpper().ToCharArray()[0] : string.Empty;
     }
     /// <summary>
     /// Updates the section number text to the section the current level is in
     /// </summary>
-    void uiSectionNumUpdate()
+    public void uiSectionNumUpdate()
     {
-        uiSectionNum.text = LevelLoader.instance.inLevel ? "Section 1": "";// + LevelLoader.instance.levelCurrent.sectionCurrent;
+        if (LevelLoader.instance.inLevel)
+        {
+            uiSectionNum.text = (LevelLoader.instance.levelCurrent.SectionCount() > 1) ? uiSectionNumText + LevelLoader.instance.levelCurrent.SectionNum() : string.Empty;
+        }
+    }
+    void uiFadeUpdate()
+    {
+        float 
+            newValue = 0,
+            fadeSpeed = 1;
+        if (uiFadeToBlack && uiFade.color.a != 1)
+        {
+            newValue = 1;
+            fadeSpeed = uiFadeInSpeed;
+        }
+        else if (!uiFadeToBlack && uiFade.color.a != 0)
+        {
+            newValue = -1;
+            fadeSpeed = uiFadeOutSpeed;
+        }
+        uiFade.color = new Color(0, 0, 0, Mathf.MoveTowards(uiFade.color.a, newValue, Time.deltaTime * fadeSpeed));
     }
     /// <summary>
     /// Activates the given menu and deactivates all other menus
