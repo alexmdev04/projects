@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -10,8 +8,6 @@ public class Player : MonoBehaviour
     // instancing
     public static Player instance { get; private set; }
     public LineRenderer lineRenderer { get; private set; }
-    public int 
-        targetFramerate;
     public Vector2 
         mouseRotation,
         mouseRotationMultiplier,
@@ -22,12 +18,19 @@ public class Player : MonoBehaviour
         lineRendererOffset = new Vector3(0f, -0.1f, 0f),
         playerDimensions = Vector3.one;
     public float playerRadius;
-    Vector2 playerEulerAngles;
+    public Vector2 playerEulerAngles;
+    public bool lookActive = true;
     [SerializeField] Light torch;
+    [SerializeField] float torchIntensityMax = 300f;
+    [SerializeField] float torchIntensityMin = 0.2f;
+    [SerializeField] float torchIntensityDistance = 15f;
+    bool torchActive;
+    RaycastHit torchHit;
 
     void Awake()
     {
         instance = this;
+        Application.targetFrameRate = 165;
         QualitySettings.vSyncCount = 1;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -42,24 +45,22 @@ public class Player : MonoBehaviour
     }
     void Update()
     {
-        Application.targetFrameRate = targetFramerate;
         lineRenderer.textureScale = new Vector2(lineRenderer.positionCount, 1);
-        if (Input.GetKeyDown(KeyCode.Tilde)) { Debug.developerConsoleVisible = !Debug.developerConsoleVisible; }
-        if (Input.GetKeyDown(KeyCode.F8)) { worksheetObj.SetActive(!worksheetObj.activeSelf); }
+        //if (Input.GetKeyDown(KeyCode.F8)) { worksheetObj.SetActive(!worksheetObj.activeSelf); }
+        if (Input.GetKeyDown(KeyCode.F)) { ToggleTorch(); }
     }
     void LateUpdate()
     {
-        Look();
+        if (lookActive) { Look(); }
     }
     void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.Equals))
+        if (torch.gameObject.activeSelf)
         {
-            targetFramerate += 1;
-        }
-        else if (Input.GetKey(KeyCode.Minus))
-        {
-            targetFramerate -= 1;
+            torch.intensity = 
+                Physics.Raycast(transform.position, transform.forward, out torchHit, torchIntensityDistance) ? 
+                Mathf.Lerp(torchIntensityMin, torchIntensityMax, Vector3.Distance(transform.position, torchHit.point) / torchIntensityDistance) 
+                : torchIntensityMax;
         }
     }
     /// <summary>
@@ -84,40 +85,38 @@ public class Player : MonoBehaviour
         playerEulerAngles.x = eulerAngles.x;
         playerEulerAngles.y = eulerAngles.y;
     }
-    ///// <summary>
-    ///// <para>Manually sets the rotation of the player</para>
-    ///// <para>Used instead of Player.instance.transform.rotation = Quaternion</para>
-    ///// </summary>
-    ///// <param name="quaternion"></param>
-    //public void LookSet(Quaternion quaternion)
-    //{
-    //    Vector3 eulerAngles = quaternion.eulerAngles;
-    //    lookRotX = eulerAngles.x;
-    //    lookRotY = eulerAngles.y;
-    //}
-    public void BeginTutorial()
-    {
-
-    }
-    public void TeleportInstant(Vector3 worldSpacePosition, Vector3 worldSpaceEulerAngles = default)
+    /// <summary>
+    /// Instantly teleports the player to the given position and rotation
+    /// </summary>
+    /// <param name="worldSpacePosition"></param>
+    /// <param name="worldSpaceEulerAngles"></param>
+    public void TeleportInstant(Vector3 worldSpacePosition, Vector3 worldSpaceEulerAngles)
     {
         Grapple.instance.PlayerTeleported(worldSpacePosition, worldSpaceEulerAngles);
         transform.position = worldSpacePosition;
-        playerEulerAngles = worldSpaceEulerAngles;
-        //if (worldSpaceEulerAngles != default) 
-        //{ 
-        //    LookSet(worldSpaceEulerAngles);
-        //}
+
+        playerEulerAngles.x = worldSpaceEulerAngles.y;
+        float yAngle = 0;
+        if (worldSpaceEulerAngles.x == 0) { yAngle = 0; }
+        else if (worldSpaceEulerAngles.x > 0 && worldSpaceEulerAngles.x <= 90) { yAngle = 0 - worldSpaceEulerAngles.x; }
+        else if (worldSpaceEulerAngles.x < 360 && worldSpaceEulerAngles.x >= 270) { yAngle = 360 - worldSpaceEulerAngles.x; }
+        playerEulerAngles.y = yAngle;
+        //Debug.Log("teleported to; pos: " + worldSpacePosition + ", inrot: " + worldSpaceEulerAngles + ", outrot: " + playerEulerAngles);
     }
-    public void debugToggleTorch()
+    public void TorchSetActive(bool state)
     {
+        torchActive = state;
+    }
+    public void ToggleTorch()
+    {
+        if (!torchActive) { return; }
         torch.gameObject.SetActive(!torch.gameObject.activeSelf);
     }
     public StringBuilder debugGetStats()
     {
         return new StringBuilder(uiDebug.str_playerTitle)
-            .Append(uiDebug.str_targetFramerate).Append(targetFramerate.ToString())
-            .Append(uiDebug.str_mouseRotation).Append(mouseRotation.ToStringBuilder()).Append(uiDebug.str_multiply).Append(mouseRotationMultiplier.ToStringBuilder())
+            .Append(uiDebug.str_targetFPS).Append(Application.targetFrameRate).Append(uiDebug.str_vSync).Append(QualitySettings.vSyncCount)
+            //.Append(uiDebug.str_mouseRotation).Append(mouseRotation.ToStringBuilder()).Append(uiDebug.str_multiply).Append(mouseRotationMultiplier.ToStringBuilder())
             .Append(uiDebug.str_lookSensitivity).Append(lookSensitivity.ToStringBuilder())
             .Append(uiDebug.str_playerDimensions).Append(playerRadius);
     }

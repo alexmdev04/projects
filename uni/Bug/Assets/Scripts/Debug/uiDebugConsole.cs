@@ -1,12 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using Unity.VisualScripting;
 using System.Linq;
 using System;
-using System.ComponentModel;
-using static System.ComponentModel.TypeConverter;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class uiDebugConsole : MonoBehaviour
 {
@@ -17,6 +15,7 @@ public class uiDebugConsole : MonoBehaviour
     public List<string> previousInputs = new() { string.Empty };
     string command;
     string data1;
+    VolumeProfile defaultProfile;
     struct commandInputs
     {
         public string command;
@@ -26,11 +25,11 @@ public class uiDebugConsole : MonoBehaviour
     }
     void Awake()
     {
-        Vector3 newVector = new Vector3(x: 1, y: 2, z: 3);
         instance = this;
         inputField = GetComponent<TMP_InputField>();
-        inputField.onSubmit.AddListener((string playerInput) => CheckCommand(playerInput) );
+        inputField.onSubmit.AddListener((string playerInput) => Command(playerInput) );
         gameObject.SetActive(false);
+        defaultProfile = LevelLoader.instance.globalVolume.profile;
     }
     void Update()
     {
@@ -41,19 +40,20 @@ public class uiDebugConsole : MonoBehaviour
     {
         previousInputs[0] = string.Empty;
         inputField.text = string.Empty;
+        previousInputsIndex = 0;
     }
-    void CheckCommand(string playerInput)
+    void Command(string input)
     {
         string outputMsg = string.Empty;
-        previousInputs.Insert(1, playerInput);
-        commandInputs parsedInput = ParseInput(playerInput);
+        previousInputs.Insert(1, input);
+        commandInputs parsedInput = ParseInput(input);
         command = parsedInput.command.ToLower();
         data1 = parsedInput.data1;
         bool data1Present = data1 != string.Empty;
         if (outputCommandInputs)
         {
             Debug.Log("command = \"" + parsedInput.command + "\", " +
-                      "input = \"" + parsedInput.data1 + "\", ");
+                      "data1 = \"" + parsedInput.data1 + "\", ");
                       //"input2 = \"" + commandInputs.input2 + "\", " +
                       //"input3 = \"" + commandInputs.input3 + "\"");
         }
@@ -61,17 +61,81 @@ public class uiDebugConsole : MonoBehaviour
         {
             case "level":
                 {
-                    if (!data1Present)
+                    switch (parsedInput.data1)
                     {
-                        InvalidInput();
-                        break;
+                        case "reload":
+                        case "restart":
+                            {
+                                LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
+                                {
+                                    levelAssetKey = LevelLoader.instance.levelCurrent.assetKey,
+                                    useFade = true,
+                                    levelDifficulty = Level.levelDifficultiesEnum.normal
+
+                                });
+                                break;
+                            }
+                        case "exit":
+                        case "leave":
+                        case "unload":
+                            {
+                                LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
+                                break;
+                            }
+                        default:
+                            {
+                                if (!data1Present)
+                                {
+                                    InvalidInput();
+                                    break;
+                                }
+                                string output = parsedInput.data1;
+                                if (int.TryParse(parsedInput.data1, out int levelNumber))
+                                {
+                                    output = "Level" + levelNumber.ToString();
+                                }
+                                LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
+                                {
+                                    levelAssetKey = output,
+                                    useFade = true,
+                                    levelDifficulty = Level.levelDifficultiesEnum.normal
+                                });
+                                break;
+                            }
                     }
-                    if (!parsedInput.data1.ToCharArray()[5..].AllCharsAreDigits())
+
+                    break;
+                }
+            case "section":
+                {
+                    switch (parsedInput.data1) 
                     {
-                        outputMsg = "Unknown level: \"" + parsedInput.data1 + "\"";
-                        break;
+                        case "skip":
+                        case "next":
+                        case "forward":
+                            {
+                                LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() + 1);
+                                break;
+                            }
+                        case "previous":
+                        case "back":
+                        case "last":
+                            {
+                                LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() - 1);
+                                break;
+                            }
+                        default:
+                            {
+                                if (parsedInput.data1.ToCharArray().AllCharsAreDigits())
+                                {
+                                    outputMsg = "Started " + LevelLoader.instance.levelCurrent.assetKey + " Section" + parsedInput.data1;
+                                    LevelLoader.instance.levelCurrent.SectionStart(Convert.ToInt32(parsedInput.data1) - 1);
+                                    break;
+                                }
+                                InvalidInput();
+                                break;
+                            }
                     }
-                    LevelLoader.instance.ChangeLevel(parsedInput.data1);
                     break;
                 }
             case "grapple":
@@ -102,28 +166,38 @@ public class uiDebugConsole : MonoBehaviour
                     break;
                 }
             case "god":
-                {
-                    uiDebug.instance.ToggleGod();
-                    break;
-                }
             case "godmode":
                 {
                     uiDebug.instance.ToggleGod();
                     break;
                 }
             case "ufo":
-                {
-                    uiDebug.instance.ToggleNoclip();
-                    break;
-                }
             case "noclip":
                 {
-                    uiDebug.instance.ToggleNoclip();
+                    float noclipSpeed = uiDebug.instance.noclipSpeed;
+                    switch (parsedInput.data1)
+                    {
+                        case "enable":
+                            {
+                                uiDebug.instance.ToggleNoclip();
+                                break;
+                            }
+                        default:
+                            {
+                                if (data1Present && !float.TryParse(parsedInput.data1, out noclipSpeed))
+                                {
+                                    InvalidInput();
+                                    break;
+                                }
+                                uiDebug.instance.noclipSpeed = noclipSpeed;
+                                break;
+                            }
+                    }
                     break;
                 }
             case "menu":
                 {
-                    LevelLoader.instance.UnloadLevelCurrent();
+                    LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
                     break;
                 }
             case "player":
@@ -146,14 +220,163 @@ public class uiDebugConsole : MonoBehaviour
                 }
             case "tutorial":
                 {
-                    LevelLoader.instance.UnloadLevelCurrent();
-                    LevelLoader.instance.menuLevel.GetComponent<uiMenuLevel>().ForceRestartTutorial();
+                    LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
+                    LevelLoader.instance.menuLevel.GetComponent<MenuLevel>().ForceRestartTutorial();
                     break;
                 }
-            case "":
+            case "fps":
                 {
+                    int fps = Application.targetFrameRate;
+                    switch (parsedInput.data1)
+                    {
+                        case "show":
+                        case "enable":
+                            {
+                                uiDebug.instance.ToggleFPS();
+                                break;
+                            }
+                        default:
+                            {
+                                if (data1Present && !int.TryParse(parsedInput.data1, out fps))
+                                {
+                                    InvalidInput();
+                                    break;
+                                }
+                                Application.targetFrameRate = fps;
+                                break;
+                            }
+                    }
                     break;
                 }
+            case "vsync":
+                {
+                    bool vSyncEnabled = QualitySettings.vSyncCount > 0;
+                    QualitySettings.vSyncCount = vSyncEnabled ? 0 : 1;
+                    outputMsg = "vSync " + (vSyncEnabled ? "Disabled" : "Enabled");
+                    break;
+                }
+            case "fov":
+                {
+                    if (float.TryParse(parsedInput.data1, out float fov))
+                    {
+                        Camera.main.fieldOfView = Extensions.FOVHorizontalToVertical(fov, Camera.main, true);
+                    }
+                    else
+                    {
+                        InvalidInput();
+                    }
+                    break;
+                }
+            case "torch":
+                {
+                    Player.instance.ToggleTorch();
+                    break;
+                }
+            case "close":
+            case "exit":
+            case "quit":
+                {
+                    Application.Quit();
+                    break;
+                }
+            case "gfx":
+            case "graphics":
+            case "effect":
+            case "effects":
+                {
+                    switch (parsedInput.data1.ToLower())
+                    {
+                        case "all":
+                            {
+                                LevelLoader.instance.globalVolume.enabled = !LevelLoader.instance.globalVolume.enabled;
+                                outputMsg = "Effects " + (LevelLoader.instance.globalVolume.enabled ? "Enabled" : "Disabled");
+                                break;
+                            }
+                        case "default":
+                        case "reset":
+                            {
+                                LevelLoader.instance.globalVolume.profile = defaultProfile;
+                                outputMsg = "Effects reset to default";
+                                break;
+                            }
+                        case "motionblur":
+                        case "blur":
+                        case "mb":
+                            {
+                                if (LevelLoader.instance.globalVolume.profile.TryGet(out MotionBlur motionBlur)) { motionBlur.active = !motionBlur.active;
+                                    outputMsg = "Motion Blur " + (motionBlur.active ? "Enabled" : "Disabled"); }
+                                break;
+                            }
+                        case "vignette":
+                            {
+                                if (LevelLoader.instance.globalVolume.profile.TryGet(out Vignette vignette)) { vignette.active = !vignette.active;
+                                    outputMsg = "Vignette " + (vignette.active ? "Enabled" : "Disabled"); }
+                                break;
+                            }
+                        case "chromaticaberration":
+                        case "ca":
+                        case "aberration":
+                            {
+                                if (LevelLoader.instance.globalVolume.profile.TryGet(out ChromaticAberration chromaticAberration)) { chromaticAberration.active = !chromaticAberration.active;
+                                    outputMsg = "Chromatic Aberration " + (chromaticAberration.active ? "Enabled" : "Disabled"); }
+                                break;
+                            }
+                        case "bloom":
+                        case "glow":
+                            {
+                                if (LevelLoader.instance.globalVolume.profile.TryGet(out Bloom bloom)) { bloom.active = !bloom.active; 
+                                    outputMsg = "Bloom " + (bloom.active ? "Enabled" : "Disabled"); }
+                                break;
+                            }
+                        case "paniniprojection":
+                        case "warp":
+                        case "warping":
+                        case "stretch":
+                            {
+                                if (LevelLoader.instance.globalVolume.profile.TryGet(out PaniniProjection paniniProjection)) { paniniProjection.active = !paniniProjection.active; 
+                                    outputMsg = "Panini Projection " + (paniniProjection.active ? "Enabled" : "Disabled"); }
+                                break;
+                            }
+                        case "tonemapping":
+                            {
+                                if (LevelLoader.instance.globalVolume.profile.TryGet(out Tonemapping tonemapping)) { tonemapping.active = !tonemapping.active; 
+                                    outputMsg = "Tonemapping " + (tonemapping.active ? "Enabled" : "Disabled"); }
+                                break;
+                            }
+                        default:
+                            {
+                                InvalidInput();
+                                break;
+                            }
+                    }
+                    break;
+                }
+            case "statsRepeatRate":
+            case "debugUpdateRate":
+                {
+                    if (float.TryParse(parsedInput.data1, out float updateRate))
+                    {
+                        updateRate = Mathf.Clamp(updateRate, 0.05f, 1f);
+                        uiDebug.instance.statsRepeatRate = updateRate;
+                        uiDebug.instance.RefreshRepeating();
+                        outputMsg = "Set statsRepeatRate to " + updateRate;
+                    }
+                    else
+                    {
+                        InvalidInput();
+                    }
+                    break;
+                }
+            //case "dev":
+            //    {
+            //        //InternalCommandCall("effect all");
+            //        InternalCommandCall("noclip 100");
+            //        InternalCommandCall("noclip enable");
+            //        InternalCommandCall("level Level3");
+            //        InternalCommandCall("effect paniniprojection");
+            //        InternalCommandCall("effect motionblur");
+            //        break;
+            //    }
             default:
                 {
                     InvalidCommand();
@@ -163,7 +386,7 @@ public class uiDebugConsole : MonoBehaviour
         inputField.text = "";
         if (outputMsg != string.Empty)
         {
-            uiMessage.instance.New(outputMsg);
+            uiMessage.instance.New(outputMsg, uiDebug.str_uiDebugConsole);
             if (uiDebug.instance.debugMode) { Debug.Log(outputMsg); }
         }
         gameObject.SetActive(false);
@@ -221,13 +444,16 @@ public class uiDebugConsole : MonoBehaviour
 
         return returnInputs;
     }
-    void InvalidCommand()
+    public void InvalidCommand(string commandOverride = default)
     {
-        uiMessage.instance.New("Invalid Command: " + command);
+        string commandOutput = commandOverride == default ? command : commandOverride;
+        uiMessage.instance.New("Invalid Command: " + commandOutput, uiDebug.str_uiDebugConsole);
     }
-    void InvalidInput()
+    public void InvalidInput(string dataOverride = default, string commandOverride = default)
     {
-        uiMessage.instance.New("Invalid input \"" + data1 + "\" for \"" + command + "\" command");
+        string dataOutput = dataOverride == default ? data1 : dataOverride;
+        string commandOutput = commandOverride == default ? command : commandOverride;
+        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);
     }
     void PreviousInput()
     {
@@ -250,6 +476,6 @@ public class uiDebugConsole : MonoBehaviour
     }
     public void InternalCommandCall(string input)
     {
-        CheckCommand(input);
+        Command(input);
     }
 }

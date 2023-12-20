@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelGoal : MonoBehaviour
@@ -34,7 +32,7 @@ public class LevelGoal : MonoBehaviour
     {
         if (collision.gameObject.GetComponent<Player>() != null)
         {
-            uiMessage.instance.New("Goal Reached!");
+            uiMessage.instance.New("Goal Reached!", uiDebug.str_LevelGoal);
             LevelLoader.instance.levelCurrent.GoalReached();
         }
     }

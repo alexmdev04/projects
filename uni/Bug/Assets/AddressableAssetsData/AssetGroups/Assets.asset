@@ -17,28 +17,8 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 86688698830f6874c8871f31323fe24d
   m_SerializeEntries:
-  - m_GUID: 1273879ad83299f43961c6ff703ec482
-    m_Address: Level0
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6499ec41e1f254a4293b83725df4c6f8
-    m_Address: game
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6fe659cd7e21e254a937c53cfb3933da
-    m_Address: ui
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 20ecaafc7e42faf45ae5e17498504cb3
     m_Address: Levels
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ebc7739975db5db4fa9a3ce163d8c428
-    m_Address: Level1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -47,13 +27,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac859255f8cf8594289493d4ed6b8708
+    m_Address: Level4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 69029e3f1d8411f4daec4ec8b9e13d66
     m_Address: Level2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ac859255f8cf8594289493d4ed6b8708
-    m_Address: Level4
+  - m_GUID: 1273879ad83299f43961c6ff703ec482
+    m_Address: Level0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ebc7739975db5db4fa9a3ce163d8c428
+    m_Address: Level1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

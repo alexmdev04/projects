@@ -1,21 +1,35 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Text;
-using Unity.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Events;
 
-[CreateAssetMenu(fileName = "NewLevelObjective", menuName = "Level/Objective")]
-public class LevelObjective : ScriptableObject
+[Serializable]
+public class LevelObjective
 {
+    public LevelObjective(ObjectiveData objectiveData)
+    {
+        type = objectiveData.type;
+        completionType = objectiveData.completionType;
+        requiredForCompletion = objectiveData.requiredForCompletion;
+        uiValueCountDown = objectiveData.uiValueCountDown;
+        completionValue = objectiveData.completionValue;
+        scoreAwarded = objectiveData.scoreAwarded;
+    }
+    [Serializable] public struct ObjectiveData
+    {
+        public objectiveTypes type;
+        public objectiveCompletionTypes completionType;
+        public bool requiredForCompletion;
+        public bool uiValueCountDown;
+        public double completionValue;
+        public float scoreAwarded;
+    }
     public enum objectiveTypes
     {
         grappleUses,
         grappleDistance,
         timeLimit,
-        alertLevel
+        alertLevel,
+        collectables
     }
     public enum objectiveCompletionTypes
     {
@@ -24,19 +38,19 @@ public class LevelObjective : ScriptableObject
         greaterThanCompletetionValue,
         greaterThanEqualToCompletetionValue
     }
-    [SerializeField] objectiveTypes type;
-    [SerializeField] objectiveCompletionTypes completionType;
-    public bool requiredForCompletion;
-    [SerializeField] bool uiValueCountDown;
-    [SerializeField][Tooltip("The player must be at this value to complete the objective")] double completionValue;
+    public objectiveTypes type { get; private set; }
+    objectiveCompletionTypes completionType;
+    public bool requiredForCompletion { get; private set; }
+    bool uiValueCountDown;
+    double completionValue;
     public bool completed { get; private set; }
-    public double currentValue
+    double currentValue
     {
         get
         {
             return _currentValue;
         }
-        private set
+        set
         {
             _currentValue = value;
             completed = isCompleted();
@@ -47,11 +61,10 @@ public class LevelObjective : ScriptableObject
         }
     }
     double _currentValue = 0d;
-    [SerializeField] [Tooltip("When the level ends this score will be awarded if the objective is complete")] double scoreAwarded;
-    [HideInInspector] public uiObjective uiObjective;
-    public bool successfulStart = false;
+    double scoreAwarded;
+    public uiObjective uiObjective;
 
-    public void Start()
+    public void StartObjective()
     {
         currentValue = 0;
         switch (type)
@@ -75,9 +88,14 @@ public class LevelObjective : ScriptableObject
                 {
                     break;
                 }
+            case objectiveTypes.collectables:
+                {
+                    LevelLoader.instance.levelCurrent.collectableCollected.AddListener(currentValueEditAuto);
+                    break;
+                }
         }
     }
-    public void Stop()
+    public void StopObjective()
     {
         Grapple.instance.fired.RemoveListener(currentValueEditAuto);
         Grapple.instance.finished.RemoveListener(currentValueEditAuto);
@@ -91,7 +109,7 @@ public class LevelObjective : ScriptableObject
 
         if (currentValue >= completionValue)
         {
-            Debug.Log(name + " completion value reached (" + completionValue + ")");
+            //Debug.Log(name + " completion value reached (" + completionValue + ")");
             currentValue = completionValue;
             return;
         }
@@ -117,6 +135,11 @@ public class LevelObjective : ScriptableObject
                 }
             case objectiveTypes.alertLevel:
                 {
+                    break;
+                }
+            case objectiveTypes.collectables:
+                {
+                    currentValueEdit(1);
                     break;
                 }
 
@@ -168,7 +191,7 @@ public class LevelObjective : ScriptableObject
     }
     public StringBuilder debugGetObjective()
     {
-        return new StringBuilder(uiDebug.str_NewLine).Append(name).Append(uiDebug.str_dash).Append(type).Append(uiDebug.str_equals).Append(currentValue).Append(uiDebug.str_divide).Append(completionValue);
+        return new StringBuilder(uiDebug.str_NewLine).Append(uiDebug.str_dash).Append(type).Append(uiDebug.str_equals).Append(currentValue).Append(uiDebug.str_divide).Append(completionValue);
     }
 
 } 

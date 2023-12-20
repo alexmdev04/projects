@@ -113,4 +113,53 @@ public static class Extensions
         foreach (char _char in chars) { isDigitBools.Add(char.IsDigit(_char)); }
         return isDigitBools.All(x => x);
     }
+    /// <summary>
+    /// Converts a horizontal field of view value to a vertical field of view value (viewportHeight == Camera.pixelHeight)
+    /// </summary>
+    /// <param name="horizontalFOV"></param>
+    /// <param name="viewportHeight"></param>
+    /// <param name="viewportWidth"></param>
+    /// <param name="clampFOV1to179"></param>
+    /// <returns>
+    /// Vertical field of view value
+    /// </returns>
+    public static float FOVHorizontalToVertical(float horizontalFOV, float viewportHeight, float viewportWidth, bool clampFOV1to179 = true)
+    {
+        return 2 * Mathf.Atan(Mathf.Tan((clampFOV1to179 ? Mathf.Clamp(horizontalFOV, 1, 179) : horizontalFOV) * Mathf.PI / 180 / 2) * viewportHeight / viewportWidth) * 180 / Mathf.PI;
+    }
+    /// <summary>
+    /// Converts a horizontal field of view value to a vertical field of view value
+    /// </summary>
+    /// <param name="horizontalFOV"></param>
+    /// <param name="viewportHeight"></param>
+    /// <param name="viewportWidth"></param>
+    /// <param name="clampFOV1to179"></param>
+    /// <returns>
+    /// Vertical field of view value
+    /// </returns>
+    public static float FOVHorizontalToVertical(float horizontalFOV, Camera camera, bool clampFOV1to179 = true)
+    {
+        return 2 * Mathf.Atan(Mathf.Tan((clampFOV1to179 ? Mathf.Clamp(horizontalFOV, 1, 179) : horizontalFOV) * Mathf.PI / 180 / 2) * camera.pixelHeight / camera.pixelWidth) * 180 / Mathf.PI;
+    }
+    public static Vector3 DirectionFromAngleY(float eulerY, float angleInDegrees) 
+    {
+        angleInDegrees += eulerY;
+        return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
+    }
+    public static Vector3 DirectionFromAngleX(float eulerX, float angleInDegrees) 
+    {
+        angleInDegrees += eulerX;
+        return new Vector3(0, Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0);
+    }
+    public static Vector3 Round(this Vector3 vector3, int digits = 0)
+    {
+        return new Vector3(MathF.Round(vector3.x, digits), MathF.Round(vector3.y, digits), MathF.Round(vector3.z, digits));
+    }
+    public static float FloatFromAxis(bool positive, bool negative) =>
+    (positive, negative) switch
+    {
+        (true, false) => 1f,
+        (false, true) => -1f,
+        _ => 0f
+    };
 }

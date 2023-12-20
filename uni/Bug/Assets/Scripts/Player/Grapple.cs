@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
@@ -18,19 +15,19 @@ public class Grapple : MonoBehaviour
     public float debugDistanceToTargetPosition { get; private set; }
 
     public GameObject grappleDestinationMarker;
-    public enum ammoStateEnum
-    {
-        infinite,
-        distanceLimited,
-        usesLimited
-    }
-    public ammoStateEnum 
-        ammoState = ammoStateEnum.infinite;
+    //public enum ammoStateEnum
+    //{
+    //    infinite,
+    //    distanceLimited,
+    //    usesLimited
+    //}
+    //public ammoStateEnum 
+    //    ammoState = ammoStateEnum.infinite;
     [SerializeField] float
         maxDistance = 500f,
+        //rotateSpeed = 1f,
         distanceFromWall = 0.1f,
-        moveSpeed = 1f,
-        rotateSpeed = 1f;
+        moveSpeed = 65f;
     [HideInInspector] public float currentDistance, distanceTravelled;
     [SerializeField] GameObject 
         grapplePoint;
@@ -42,13 +39,14 @@ public class Grapple : MonoBehaviour
     //    ammoUsesCurrent,
     //    ammoUsesMax;
     RaycastHit 
-        hit1;
+        hit;
     MeshRenderer 
         grapplePointRenderer;
     bool 
         movementActive,
         cancelled;
     Vector3
+        startPosition,
         targetPosition;
     Quaternion
         targetRotation;
@@ -85,7 +83,7 @@ public class Grapple : MonoBehaviour
         grapplePointRenderer.material.SetColor("_fresnelColor", grapplePointValid ? Color.green : Color.red);
 
         // this sends a ray from the center of the camera to a raycastable wall, there can be a distance cap
-        if (Physics.Raycast(Player.instance.transform.position, Player.instance.transform.TransformDirection(Vector3.forward), out hit1, maxDistance, layerMask))
+        if (Physics.Raycast(Player.instance.transform.position, Player.instance.transform.TransformDirection(Vector3.forward), out hit, maxDistance, layerMask))
         {
             GrapplePointValidCheck();
         }
@@ -103,20 +101,20 @@ public class Grapple : MonoBehaviour
     void GrapplePointValidCheck() 
     { 
         // the sphere overlap radius must be slightly bigger than the player to make sure the grapple point surface is collided with
-        targetPosition = hit1.point + hit1.normal * (Player.instance.playerRadius + distanceFromWall);
+        targetPosition = hit.point + hit.normal * (Player.instance.playerRadius + distanceFromWall);
         grapplePointCheck = Physics.OverlapSphere(targetPosition, Player.instance.playerRadius + distanceFromWall + 0.01f, layerMask);
 
         // if the sphere collides with more than the wall the player is looking at then it is most likely invalid
         // however this could cause overlapped colliders to be invalid locations
         grapplePointValid = !(grapplePointCheck.Length > 1); 
         grapplePoint.transform.position = targetPosition;
-        currentDistance = Vector3.Distance(Player.instance.transform.position, hit1.point);
+        currentDistance = Vector3.Distance(Player.instance.transform.position, hit.point);
         debugTargetPosition = targetPosition;
         if (uiDebug.instance.debugMode)
         {
-            Debug.DrawLine(Player.instance.transform.position + Player.instance.lineRendererOffset, hit1.point, Color.cyan);
+            Debug.DrawLine(Player.instance.transform.position + Player.instance.lineRendererOffset, hit.point, Color.cyan);
             Popcron.Gizmos.Sphere(targetPosition, Player.instance.playerRadius + distanceFromWall + 0.01f, Color.cyan);
-            Debug.DrawRay(hit1.point, hit1.normal);
+            Debug.DrawRay(hit.point, hit.normal);
         }
     }
     /// <summary>
@@ -133,8 +131,9 @@ public class Grapple : MonoBehaviour
         {
 			// lerp to the grapple destination and reflect rotation if enabled
 			playerMoving = true;
-            targetRotation = Player.instance.transform.rotation.ReflectRotation(hit1.normal);
-            targetPosition = hit1.point + hit1.normal * Player.instance.playerRadius;
+            startPosition = Player.instance.transform.position;
+            //targetRotation = Player.instance.transform.rotation.ReflectRotation(hit.normal);
+            targetPosition = hit.point + hit.normal * Player.instance.playerRadius;
             fired.Invoke();
         }
     }
@@ -144,18 +143,17 @@ public class Grapple : MonoBehaviour
     public void GrapplePlayerMovement()
     {
         if (!playerMoving) { return; }
-        if (grappleDestinationMarker.activeSelf) { grappleDestinationMarker.transform.position = targetPosition; }
-        distanceTravelled = Vector3.Distance(Player.instance.transform.position, targetPosition);
-        currentDistance = Vector3.Distance(Player.instance.transform.position, hit1.point);
+        grappleDestinationMarker.transform.position = targetPosition;
+        currentDistance = Vector3.Distance(Player.instance.transform.position, hit.point);
         Player.instance.transform.position = Vector3.MoveTowards(Player.instance.transform.position, targetPosition, Time.deltaTime * moveSpeed);
         //if (playerRotation) { Player.instance.LookSet(Quaternion.Lerp(Player.instance.transform.rotation, targetRotation, Time.deltaTime * rotateSpeed).eulerAngles); }
-        debugDistanceToTargetPosition = distanceTravelled;
+        debugDistanceToTargetPosition = currentDistance;
         if (Vector3.Distance(Player.instance.transform.position, targetPosition) == 0) { GrapplePlayerMovementFinished(); }
     }
     void GrapplePlayerMovementFinished()
     {
         playerMoving = false;
-        distanceTravelled = 0;
+        distanceTravelled = Vector3.Distance(startPosition, targetPosition);
         finished.Invoke();
     }
     public void PlayerTeleported(Vector3 position, Vector3 eulerAngles = default)
@@ -194,7 +192,7 @@ public class Grapple : MonoBehaviour
         grapplePoint.SetActive(false);
         grapplePointCheck = null;
     }
-    public void Cancel()
+    public void GrappleCancel()
     {
         cancelled = true;
         GrapplePointReset();
@@ -221,7 +219,7 @@ public class Grapple : MonoBehaviour
             .Append(uiDebug.str_grapplePointCheck).Append(((grapplePointCheck != null) ? grapplePointCheck.Length : 0).ToString())
             .Append(uiDebug.str_grapplePointCheckNames).Append((grapplePointCheck != null) ? grapplePointCheck.ToStringBuilder() : uiDebug.str_notApplicable)
             .Append(uiDebug.str_targetPosition).Append(debugTargetPosition.ToStringBuilder())
-            .Append(uiDebug.str_targetRotation).Append(debugTargetRotation.ToStringBuilder())
+            //.Append(uiDebug.str_targetRotation).Append(debugTargetRotation.ToStringBuilder())
             .Append(uiDebug.str_distanceToTargetPosition).Append(debugDistanceToTargetPosition.ToString());
     }
     public void debugMaxDistanceEdit(float value)

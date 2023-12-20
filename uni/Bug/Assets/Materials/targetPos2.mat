@@ -128,14 +128,14 @@ Material:
     - _ZTest: 4
     - _ZWrite: 0
     - _ZWriteControl: 0
-    - _fresnelIntensity: 3
-    - _scrollSpeed: 0.5
+    - _fresnelIntensity: 1.5
+    - _scrollSpeed: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 1, b: 0, a: 0.5019608}
     - _Color: {r: 0, g: 1, b: 0, a: 0.5019608}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _baseColor: {r: 0.38679245, g: 0.38679245, b: 0.38679245, a: 0}
+    - _baseColor: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 0}
     - _fresnelColor: {r: 2.670157, g: 0, b: 2.670157, a: 0}
     - _hologramTextureTiling: {r: 1, g: 3, b: 0, a: 0}
   m_BuildTextureStacks: []

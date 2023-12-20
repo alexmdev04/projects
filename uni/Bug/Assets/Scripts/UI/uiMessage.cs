@@ -1,33 +1,38 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class uiMessage : MonoBehaviour
 {
     public static uiMessage instance { get; private set; }
     TextMeshProUGUI textBox;
-    public List<string> messages = new();
-    public List<float> messageDurations = new();
+    List<string> messages = new();
     StringBuilder displayText;
     RectTransform rectTransform;
-    float targetYPos;
-    float startYPos;
     int messageCount;
-    [SerializeField] float yPerMsg = 42.5f;
-    [SerializeField] float animSpeed = 5f;
+    float resetTimeCurrent;
+    float 
+        targetYPos,
+        startYPos;
+    [SerializeField] bool 
+        debugMessageSenders;
+    [SerializeField] float 
+        yPerMsg = 42.5f,
+        animSpeed = 5f, 
+        resetTime = 3f;
     void Awake()
     {
         instance = this;
         rectTransform = GetComponent<RectTransform>();
         textBox = GetComponent<TextMeshProUGUI>();
-        startYPos = rectTransform.position.y;
+        //startYPos = textBox.margin.y - yPerMsg;
     }
     void Update()
     {
         displayText = new StringBuilder();
         messageCount = 0;
+        // gathers all valid messages and displays them as one block of text
         foreach (string msg in messages)
         {
             // if a message has been nullified it is skipped 
@@ -36,56 +41,49 @@ public class uiMessage : MonoBehaviour
             displayText.Append(msg).Append("\n");
         }
         textBox.text = displayText.ToString();
+
         // if all messages are nullified, the lists are cleared
-        if (textBox.text == string.Empty) { Clear(); } 
+        if (textBox.text == string.Empty) { Clear(); }
 
         // depending on the current number of messages,
-        targetYPos = startYPos + (messageCount * yPerMsg);
         // the text box lerps up to make it look like the message is sliding up onto the screen
-        rectTransform.position = new(rectTransform.position.x,
-                                     Mathf.Lerp(rectTransform.position.y, targetYPos, animSpeed * Time.deltaTime),
-                                     rectTransform.position.z);
+        targetYPos = messageCount * yPerMsg;
+        textBox.margin = new(0, Mathf.Lerp(textBox.margin.y, -targetYPos, animSpeed * Time.deltaTime), 0, 0);
 
+        // every time a new message is added this timer is reset, if the timer reaches 0 then all messages are cleared
+        if (resetTimeCurrent > 0) { resetTimeCurrent -= Time.deltaTime; }
+        else 
+        { 
+            resetTimeCurrent = 0;
+            Clear();
+        }
     }
     /// <summary>
-    /// Displays a new temporary uiMessage
+    /// Displays a new temporary message on the screen, the message will disappear if no messages have been added for 2 seconds
     /// </summary>
     /// <param name="text"></param>
-    /// <param name="duration"></param>
-    public void New(string text, float duration = 3f)
+    public void New(string text, string sender = "Undefined Sender")
     {
         messages.Add(text);
-        messageDurations.Add(duration);
-        StartCoroutine(RemoveAfter(messages.IndexOf(text), duration));
-        //if (uiDebug.instance.debugMode) { Debug.Log(text); }
+        resetTimeCurrent = resetTime;
+        if (debugMessageSenders) { Debug.Log(sender + ": " + text); }
     }
     /// <summary>
-    /// Waits until removing a uiMessage at a given index
-    /// </summary>
-    /// <param name="msgIndex"></param>
-    /// <param name="duration"></param>
-    /// <returns></returns>
-    IEnumerator RemoveAfter(int msgIndex, float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        Remove(msgIndex);
-    }
-    /// <summary>
-    /// Removes all uiMessages / Clears the list of messages
+    /// Clears the messages list
     /// </summary>
     public void Clear()
     {
-        messages.Clear();
-        messageDurations.Clear();
+        if (messages.Count > 0) { messages.Clear(); }
     }
     /// <summary>
     /// <para>Instantly removes a uiMessage at a given index</para>
     /// <para>This only nullifies the message, it does not delete it from the list of messages</para>
     /// </summary>
     /// <param name="msgIndex"></param>
+    // the message is only nullified to keep index numbers intact
+    // empty text is ignored when building the displayText so it achieves the same result as deleting
     public void Remove(int msgIndex)
     {
         messages[msgIndex] = string.Empty;
-        messageDurations[msgIndex] = 0;
     }
 }

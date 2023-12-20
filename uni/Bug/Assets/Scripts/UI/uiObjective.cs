@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -47,11 +45,16 @@ public class uiObjective : MonoBehaviour
                         customReturn = (completionValue - currentValue).ConvertTime() + " left";
                         break;
                     }
+                case LevelObjective.objectiveTypes.collectables:
+                    {
+                        text = "Key = ";
+                        break;
+                    }
             }
 
             uiObjectiveText.text = text + ((customReturn != string.Empty) ? customReturn :
                 (uiValueCountDown ? completionValue - currentValue + unit + " left" : currentValue + unit + " / " + completionValue + unit));
-            name = "uiObjective - " + objective.name;
+            name = "uiObjective - " + objective.type;
             uiObjectiveMarker.text = objective.completed ? tickText : crossText;
             uiObjectiveMarker.color = objective.completed ? Color.green : Color.red;
         }
