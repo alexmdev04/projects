@@ -29,7 +29,7 @@ public class uiDebugConsole : MonoBehaviour
         inputField = GetComponent<TMP_InputField>();
         inputField.onSubmit.AddListener((string playerInput) => Command(playerInput) );
         gameObject.SetActive(false);
-        defaultProfile = LevelLoader.instance.globalVolume.profile;
+        defaultProfile = Game.instance.globalVolume.profile;
     }
     void Update()
     {
@@ -59,112 +59,112 @@ public class uiDebugConsole : MonoBehaviour
         }
         switch (parsedInput.command)
         {
-            case "level":
-                {
-                    switch (parsedInput.data1)
-                    {
-                        case "reload":
-                        case "restart":
-                            {
-                                LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
-                                {
-                                    levelAssetKey = LevelLoader.instance.levelCurrent.assetKey,
-                                    useFade = true,
-                                    levelDifficulty = Level.levelDifficultiesEnum.normal
+            // case "level":
+            //     {
+            //         switch (parsedInput.data1)
+            //         {
+            //             case "reload":
+            //             case "restart":
+            //                 {
+            //                     LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
+            //                     {
+            //                         levelAssetKey = LevelLoader.instance.levelCurrent.assetKey,
+            //                         useFade = true,
+            //                         levelDifficulty = Level.levelDifficultiesEnum.normal
 
-                                });
-                                break;
-                            }
-                        case "exit":
-                        case "leave":
-                        case "unload":
-                            {
-                                LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
-                                break;
-                            }
-                        default:
-                            {
-                                if (!data1Present)
-                                {
-                                    InvalidInput();
-                                    break;
-                                }
-                                string output = parsedInput.data1;
-                                if (int.TryParse(parsedInput.data1, out int levelNumber))
-                                {
-                                    output = "Level" + levelNumber.ToString();
-                                }
-                                LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
-                                {
-                                    levelAssetKey = output,
-                                    useFade = true,
-                                    levelDifficulty = Level.levelDifficultiesEnum.normal
-                                });
-                                break;
-                            }
-                    }
+            //                     });
+            //                     break;
+            //                 }
+            //             case "exit":
+            //             case "leave":
+            //             case "unload":
+            //                 {
+            //                     LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
+            //                     break;
+            //                 }
+            //             default:
+            //                 {
+            //                     if (!data1Present)
+            //                     {
+            //                         InvalidInput();
+            //                         break;
+            //                     }
+            //                     string output = parsedInput.data1;
+            //                     if (int.TryParse(parsedInput.data1, out int levelNumber))
+            //                     {
+            //                         output = "Level" + levelNumber.ToString();
+            //                     }
+            //                     LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
+            //                     {
+            //                         levelAssetKey = output,
+            //                         useFade = true,
+            //                         levelDifficulty = Level.levelDifficultiesEnum.normal
+            //                     });
+            //                     break;
+            //                 }
+            //         }
 
-                    break;
-                }
-            case "section":
-                {
-                    switch (parsedInput.data1) 
-                    {
-                        case "skip":
-                        case "next":
-                        case "forward":
-                            {
-                                LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() + 1);
-                                break;
-                            }
-                        case "previous":
-                        case "back":
-                        case "last":
-                            {
-                                LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() - 1);
-                                break;
-                            }
-                        default:
-                            {
-                                if (parsedInput.data1.ToCharArray().AllCharsAreDigits())
-                                {
-                                    outputMsg = "Started " + LevelLoader.instance.levelCurrent.assetKey + " Section" + parsedInput.data1;
-                                    LevelLoader.instance.levelCurrent.SectionStart(Convert.ToInt32(parsedInput.data1) - 1);
-                                    break;
-                                }
-                                InvalidInput();
-                                break;
-                            }
-                    }
-                    break;
-                }
-            case "grapple":
-                {
-                    switch (parsedInput.data1)
-                    {
-                        case "enable":
-                            {
-                                Grapple.instance.Enable();
-                                break;
-                            }
-                        case "disable":
-                            {
-                                Grapple.instance.Disable();
-                                break;
-                            }
-                        case "testcube":
-                            {
-                                Grapple.instance.grappleDestinationMarker.SetActive(Grapple.instance.grappleDestinationMarker.activeSelf);
-                                break;
-                            }
-                        default:
-                            {
-                                InvalidInput();
-                                break;
-                            }
-                    }
-                    break;
-                }
+            //         break;
+            //    }
+            // case "section":
+            //     {
+            //         switch (parsedInput.data1) 
+            //         {
+            //             case "skip":
+            //             case "next":
+            //             case "forward":
+            //                 {
+            //                     LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() + 1);
+            //                     break;
+            //                 }
+            //             case "previous":
+            //             case "back":
+            //             case "last":
+            //                 {
+            //                     LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() - 1);
+            //                     break;
+            //                 }
+            //             default:
+            //                 {
+            //                     if (parsedInput.data1.ToCharArray().AllCharsAreDigits())
+            //                     {
+            //                         outputMsg = "Started " + LevelLoader.instance.levelCurrent.assetKey + " Section" + parsedInput.data1;
+            //                         LevelLoader.instance.levelCurrent.SectionStart(Convert.ToInt32(parsedInput.data1) - 1);
+            //                         break;
+            //                     }
+            //                     InvalidInput();
+            //                     break;
+            //                 }
+            //         }
+            //         break;
+            //     }
+            // case "grapple":
+            //     {
+            //         switch (parsedInput.data1)
+            //         {
+            //             case "enable":
+            //                 {
+            //                     Grapple.instance.Enable();
+            //                     break;
+            //                 }
+            //             case "disable":
+            //                 {
+            //                     Grapple.instance.Disable();
+            //                     break;
+            //                 }
+            //             case "testcube":
+            //                 {
+            //                     Grapple.instance.grappleDestinationMarker.SetActive(Grapple.instance.grappleDestinationMarker.activeSelf);
+            //                     break;
+            //                 }
+            //             default:
+            //                 {
+            //                     InvalidInput();
+            //                     break;
+            //                 }
+            //         }
+            //         break;
+            //     }
             case "god":
             case "godmode":
                 {
@@ -197,7 +197,7 @@ public class uiDebugConsole : MonoBehaviour
                 }
             case "menu":
                 {
-                    LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
+                    //LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
                     break;
                 }
             case "player":
@@ -218,12 +218,12 @@ public class uiDebugConsole : MonoBehaviour
                     }
                     break;
                 }
-            case "tutorial":
-                {
-                    LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
-                    LevelLoader.instance.menuLevel.GetComponent<MenuLevel>().ForceRestartTutorial();
-                    break;
-                }
+            // case "tutorial":
+            //     {
+            //         LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
+            //         LevelLoader.instance.menuLevel.GetComponent<MenuLevel>().ForceRestartTutorial();
+            //         break;
+            //     }
             case "fps":
                 {
                     int fps = Application.targetFrameRate;
@@ -288,14 +288,14 @@ public class uiDebugConsole : MonoBehaviour
                     {
                         case "all":
                             {
-                                LevelLoader.instance.globalVolume.enabled = !LevelLoader.instance.globalVolume.enabled;
-                                outputMsg = "Effects " + (LevelLoader.instance.globalVolume.enabled ? "Enabled" : "Disabled");
+                                Game.instance.globalVolume.enabled = !Game.instance.globalVolume.enabled;
+                                outputMsg = "Effects " + (Game.instance.globalVolume.enabled ? "Enabled" : "Disabled");
                                 break;
                             }
                         case "default":
                         case "reset":
                             {
-                                LevelLoader.instance.globalVolume.profile = defaultProfile;
+                                Game.instance.globalVolume.profile = defaultProfile;
                                 outputMsg = "Effects reset to default";
                                 break;
                             }
@@ -303,13 +303,13 @@ public class uiDebugConsole : MonoBehaviour
                         case "blur":
                         case "mb":
                             {
-                                if (LevelLoader.instance.globalVolume.profile.TryGet(out MotionBlur motionBlur)) { motionBlur.active = !motionBlur.active;
+                                if (Game.instance.globalVolume.profile.TryGet(out MotionBlur motionBlur)) { motionBlur.active = !motionBlur.active;
                                     outputMsg = "Motion Blur " + (motionBlur.active ? "Enabled" : "Disabled"); }
                                 break;
                             }
                         case "vignette":
                             {
-                                if (LevelLoader.instance.globalVolume.profile.TryGet(out Vignette vignette)) { vignette.active = !vignette.active;
+                                if (Game.instance.globalVolume.profile.TryGet(out Vignette vignette)) { vignette.active = !vignette.active;
                                     outputMsg = "Vignette " + (vignette.active ? "Enabled" : "Disabled"); }
                                 break;
                             }
@@ -317,14 +317,14 @@ public class uiDebugConsole : MonoBehaviour
                         case "ca":
                         case "aberration":
                             {
-                                if (LevelLoader.instance.globalVolume.profile.TryGet(out ChromaticAberration chromaticAberration)) { chromaticAberration.active = !chromaticAberration.active;
+                                if (Game.instance.globalVolume.profile.TryGet(out ChromaticAberration chromaticAberration)) { chromaticAberration.active = !chromaticAberration.active;
                                     outputMsg = "Chromatic Aberration " + (chromaticAberration.active ? "Enabled" : "Disabled"); }
                                 break;
                             }
                         case "bloom":
                         case "glow":
                             {
-                                if (LevelLoader.instance.globalVolume.profile.TryGet(out Bloom bloom)) { bloom.active = !bloom.active; 
+                                if (Game.instance.globalVolume.profile.TryGet(out Bloom bloom)) { bloom.active = !bloom.active; 
                                     outputMsg = "Bloom " + (bloom.active ? "Enabled" : "Disabled"); }
                                 break;
                             }
@@ -333,13 +333,13 @@ public class uiDebugConsole : MonoBehaviour
                         case "warping":
                         case "stretch":
                             {
-                                if (LevelLoader.instance.globalVolume.profile.TryGet(out PaniniProjection paniniProjection)) { paniniProjection.active = !paniniProjection.active; 
+                                if (Game.instance.globalVolume.profile.TryGet(out PaniniProjection paniniProjection)) { paniniProjection.active = !paniniProjection.active; 
                                     outputMsg = "Panini Projection " + (paniniProjection.active ? "Enabled" : "Disabled"); }
                                 break;
                             }
                         case "tonemapping":
                             {
-                                if (LevelLoader.instance.globalVolume.profile.TryGet(out Tonemapping tonemapping)) { tonemapping.active = !tonemapping.active; 
+                                if (Game.instance.globalVolume.profile.TryGet(out Tonemapping tonemapping)) { tonemapping.active = !tonemapping.active; 
                                     outputMsg = "Tonemapping " + (tonemapping.active ? "Enabled" : "Disabled"); }
                                 break;
                             }

@@ -35,7 +35,7 @@ public class ui : MonoBehaviour
     }
     void Start()
     {
-        InvokeRepeating(nameof(uiObjectivesRefresh), 1f, 1f);
+        //InvokeRepeating(nameof(uiObjectivesRefresh), 1f, 1f);
     }
     void Update()
     {

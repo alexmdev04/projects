@@ -13,10 +13,10 @@ public class uiDebug : MonoBehaviour
         uiNotes,
         //uiStats,
         uiStatsPlayer,
-        uiStatsStealth,
-        uiStatsGrapple,
+        //uiStatsStealth,
+        //uiStatsGrapple,
         uiStatsMiscellaneous,
-        uiStatsLevel,
+        //uiStatsLevel,
         uiVersion;
     [SerializeField] GameObject 
         uiDebugGroup,
@@ -153,19 +153,19 @@ public class uiDebug : MonoBehaviour
         if (!debugMode)
         {
             uiStatsPlayer.text = string.Empty;
-            uiStatsGrapple.text = string.Empty;
-            uiStatsLevel.text = string.Empty;
-            uiStatsStealth.text = string.Empty;
+            //uiStatsGrapple.text = string.Empty;
+            //uiStatsLevel.text = string.Empty;
+            //uiStatsStealth.text = string.Empty;
             uiStatsMiscellaneous.text = string.Empty;
             return;
         }
         uiStatsPlayer.text = Player.instance.debugGetStats().ToString();
-        uiStatsGrapple.text = Grapple.instance.debugGetStats().ToString();
-        uiStatsLevel.text = new StringBuilder(str_levelTitle).Append(LevelLoader.instance.inLevel).Append(LevelLoader.instance.levelCurrent != null ? LevelLoader.instance.levelCurrent.debugGetStats().ToString() : string.Empty).ToString();
-        uiStatsStealth.text = StealthHandler.instance.debugGetStats().ToString();
+        //uiStatsGrapple.text = Grapple.instance.debugGetStats().ToString();
+        //uiStatsLevel.text = new StringBuilder(str_levelTitle).Append(LevelLoader.instance.inLevel).Append(LevelLoader.instance.levelCurrent != null ? LevelLoader.instance.levelCurrent.debugGetStats().ToString() : string.Empty).ToString();
+        //uiStatsStealth.text = StealthHandler.instance.debugGetStats().ToString();
         uiStatsMiscellaneous.text = new StringBuilder("<u>Miscellaneous;</u>")
-            .Append("\nuiFadeAlpha = ").Append(ui.instance.uiFadeAlpha)
-            .Append("\nplayerVisible = ").Append(StealthHandler.instance.playerVisible).ToString();
+            .Append("\nuiFadeAlpha = ").Append(ui.instance.uiFadeAlpha).ToString();
+            //.Append("\nplayerVisible = ").Append(StealthHandler.instance.playerVisible).ToString();
     }
     void GetDebugNotes() // scans all loaded scenes and their root game objects for uiDebugNote components and combines them all
     {
@@ -203,8 +203,8 @@ public class uiDebug : MonoBehaviour
     void Controls() // allows for WASD movement control and scroll to change the grapple distance
     {
         // scroll to change hook distance
-        float scrollY = Input.mouseScrollDelta.y;
-        if (scrollY != 0) { Grapple.instance.debugMaxDistanceEdit(scrollY); }
+        //float scrollY = Input.mouseScrollDelta.y;
+        //if (scrollY != 0) { Grapple.instance.debugMaxDistanceEdit(scrollY); }
 
         // enables debug notes on screen
         if (Input.GetKeyDown(KeyCode.Insert)) { showNotes = !showNotes; }

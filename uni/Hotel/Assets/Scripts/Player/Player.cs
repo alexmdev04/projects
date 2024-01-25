@@ -92,7 +92,7 @@ public class Player : MonoBehaviour
     /// <param name="worldSpaceEulerAngles"></param>
     public void TeleportInstant(Vector3 worldSpacePosition, Vector3 worldSpaceEulerAngles)
     {
-        Grapple.instance.PlayerTeleported(worldSpacePosition, worldSpaceEulerAngles);
+        //Grapple.instance.PlayerTeleported(worldSpacePosition, worldSpaceEulerAngles);
         transform.position = worldSpacePosition;
 
         playerEulerAngles.x = worldSpaceEulerAngles.y;
