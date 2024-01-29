@@ -59,112 +59,6 @@ public class uiDebugConsole : MonoBehaviour
         }
         switch (parsedInput.command)
         {
-            // case "level":
-            //     {
-            //         switch (parsedInput.data1)
-            //         {
-            //             case "reload":
-            //             case "restart":
-            //                 {
-            //                     LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
-            //                     {
-            //                         levelAssetKey = LevelLoader.instance.levelCurrent.assetKey,
-            //                         useFade = true,
-            //                         levelDifficulty = Level.levelDifficultiesEnum.normal
-
-            //                     });
-            //                     break;
-            //                 }
-            //             case "exit":
-            //             case "leave":
-            //             case "unload":
-            //                 {
-            //                     LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
-            //                     break;
-            //                 }
-            //             default:
-            //                 {
-            //                     if (!data1Present)
-            //                     {
-            //                         InvalidInput();
-            //                         break;
-            //                     }
-            //                     string output = parsedInput.data1;
-            //                     if (int.TryParse(parsedInput.data1, out int levelNumber))
-            //                     {
-            //                         output = "Level" + levelNumber.ToString();
-            //                     }
-            //                     LevelLoader.instance.LoadLevel(new LevelLoader.levelLoadData()
-            //                     {
-            //                         levelAssetKey = output,
-            //                         useFade = true,
-            //                         levelDifficulty = Level.levelDifficultiesEnum.normal
-            //                     });
-            //                     break;
-            //                 }
-            //         }
-
-            //         break;
-            //    }
-            // case "section":
-            //     {
-            //         switch (parsedInput.data1) 
-            //         {
-            //             case "skip":
-            //             case "next":
-            //             case "forward":
-            //                 {
-            //                     LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() + 1);
-            //                     break;
-            //                 }
-            //             case "previous":
-            //             case "back":
-            //             case "last":
-            //                 {
-            //                     LevelLoader.instance.levelCurrent.SectionStart(LevelLoader.instance.levelCurrent.SectionIndex() - 1);
-            //                     break;
-            //                 }
-            //             default:
-            //                 {
-            //                     if (parsedInput.data1.ToCharArray().AllCharsAreDigits())
-            //                     {
-            //                         outputMsg = "Started " + LevelLoader.instance.levelCurrent.assetKey + " Section" + parsedInput.data1;
-            //                         LevelLoader.instance.levelCurrent.SectionStart(Convert.ToInt32(parsedInput.data1) - 1);
-            //                         break;
-            //                     }
-            //                     InvalidInput();
-            //                     break;
-            //                 }
-            //         }
-            //         break;
-            //     }
-            // case "grapple":
-            //     {
-            //         switch (parsedInput.data1)
-            //         {
-            //             case "enable":
-            //                 {
-            //                     Grapple.instance.Enable();
-            //                     break;
-            //                 }
-            //             case "disable":
-            //                 {
-            //                     Grapple.instance.Disable();
-            //                     break;
-            //                 }
-            //             case "testcube":
-            //                 {
-            //                     Grapple.instance.grappleDestinationMarker.SetActive(Grapple.instance.grappleDestinationMarker.activeSelf);
-            //                     break;
-            //                 }
-            //             default:
-            //                 {
-            //                     InvalidInput();
-            //                     break;
-            //                 }
-            //         }
-            //         break;
-            //     }
             case "god":
             case "godmode":
                 {
@@ -218,12 +112,6 @@ public class uiDebugConsole : MonoBehaviour
                     }
                     break;
                 }
-            // case "tutorial":
-            //     {
-            //         LevelLoader.instance.UnloadLevel(LevelLoader.instance.levelCurrent, true, true);
-            //         LevelLoader.instance.menuLevel.GetComponent<MenuLevel>().ForceRestartTutorial();
-            //         break;
-            //     }
             case "fps":
                 {
                     int fps = Application.targetFrameRate;
@@ -267,11 +155,11 @@ public class uiDebugConsole : MonoBehaviour
                     }
                     break;
                 }
-            case "torch":
-                {
-                    Player.instance.ToggleTorch();
-                    break;
-                }
+            //case "torch":
+            //    {
+            //        Player.instance.ToggleTorch();
+            //        break;
+            //    }
             case "close":
             case "exit":
             case "quit":
@@ -453,7 +341,7 @@ public class uiDebugConsole : MonoBehaviour
     {
         string dataOutput = dataOverride == default ? data1 : dataOverride;
         string commandOutput = commandOverride == default ? command : commandOverride;
-        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);
+        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);   
     }
     void PreviousInput()
     {

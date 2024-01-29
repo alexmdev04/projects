@@ -31,7 +31,7 @@ public class ui : MonoBehaviour
         crosshair = GetComponentInChildren<uiCrosshair>();
         settings = GetComponentInChildren<uiSettings>();
         settings.gameObject.SetActive(false);
-    //    LevelLoader.instance.levelLoaded.AddListener(Refresh);
+        //LevelLoader.instance.levelLoaded.AddListener(Refresh);
     }
     void Start()
     {
@@ -42,70 +42,10 @@ public class ui : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape)) { settings.gameObject.SetActive(!settings.gameObject.activeSelf); }
         uiFadeUpdate();
     }
-    /// <summary>
-    /// Updates all ui elements currently needed
-    /// </summary>
-    void Refresh()
+    void Pause()
     {
-    //    uiObjectivesBuild();
-    //    uiObjectivesRefresh();
-    //    uiLevelNumUpdate();
-    //    uiSectionNumUpdate();
+
     }
-    /// <summary>
-    /// Creates ui representations for all active objectives and deletes any currently present.
-    /// </summary>
-    //public void uiObjectivesBuild()
-    //{
-    //    foreach (uiObjective uiObjective in uiObjectives) { Destroy(uiObjective.gameObject); }
-    //    uiObjectives.Clear();
-    //    foreach (LevelObjective objective in LevelLoader.instance.levelCurrent.currentObjectives)
-    //    {
-    //        uiObjective uiObjectiveNew = Instantiate(uiObjectivePrefab, uiObjectivesParent.transform).GetComponent<uiObjective>();
-    //        objective.uiObjective = uiObjectiveNew;
-    //        uiObjectiveNew.objective = objective;
-    //        uiObjectives.Add(uiObjectiveNew);
-    //        uiObjectiveNew.gameObject.SetActive(true);
-    //    }
-    //}
-    /// <summary>
-    /// Destorys all uiObjective objects
-    /// </summary>
-    // public void uiObjectivesDestroy()
-    // {
-    //     foreach (uiObjective uiObjective in uiObjectives) { Destroy(uiObjective.gameObject); }
-    //     uiObjectives.Clear();
-    // }
-    /// <summary>
-    /// Keeps the text displayed on all uiObjectives up to date with current values
-    /// </summary>
-    // void uiObjectivesRefresh()
-    // {
-    //     if (LevelLoader.instance.inLevel)
-    //     {
-    //         for (int i = 0; i < LevelLoader.instance.levelCurrent.currentObjectives.Count; i++)
-    //         {
-    //             LevelLoader.instance.levelCurrent.currentObjectives[i].uiObjectiveRefresh();
-    //         }
-    //     }
-    // }
-    /// <summary>
-    /// Updates the level number text to the current levels number
-    /// </summary>
-    // void uiLevelNumUpdate()
-    // {
-    //     uiLevelNum.text = LevelLoader.instance.inLevel ? uiLevelNumText + LevelLoader.instance.levelCurrent.levelNumber + uiLevelNumDashText + LevelLoader.instance.levelCurrent.levelDifficulty.ToString().ToUpper().ToCharArray()[0] : string.Empty;
-    // }
-    /// <summary>
-    /// Updates the section number text to the section the current level is in
-    /// </summary>
-    // public void uiSectionNumUpdate()
-    // {
-    //     if (LevelLoader.instance.inLevel)
-    //     {
-    //         uiSectionNum.text = (LevelLoader.instance.levelCurrent.SectionCount() > 1) ? uiSectionNumText + (LevelLoader.instance.levelCurrent.SectionIndex() + 1) : string.Empty;
-    //     }
-    // }
     /// <summary>
     /// Updates the color of the ui fade element on screen used to hide the screen, uiFadeToBlack controls the direction of the fade
     /// </summary>

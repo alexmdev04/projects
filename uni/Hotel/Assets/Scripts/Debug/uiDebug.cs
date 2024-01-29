@@ -11,10 +11,7 @@ public class uiDebug : MonoBehaviour
         uiFPSText,
         uiRes,
         uiNotes,
-        //uiStats,
         uiStatsPlayer,
-        //uiStatsStealth,
-        //uiStatsGrapple,
         uiStatsMiscellaneous,
         //uiStatsLevel,
         uiVersion;
@@ -38,18 +35,6 @@ public class uiDebug : MonoBehaviour
         str_lookSensitivity = "\nlookSensitivity = ",
         str_playerDimensions = "\nplayerRadius = ",
         str_multiply = " * ",
-        // grapple
-        str_grappleTitle = "<u>Grapple;</u>",
-        str_maxDistance = "\nmaxDistance = ",
-        str_currentDistance = "\ncurrentDistance = ",
-        str_playerMoving = "\nplayerMoving = ",
-        str_grapplePointValid = "\ngrapplePointValid = ",
-        str_grapplePointCheck = "\ngrapplePointCheck;\n  collisions = ",
-        str_grapplePointCheckNames = ", names = ",
-        str_targetPosition = "\ntargetPosition = ",
-        str_targetRotation = "\ntargetRotation = ",
-        str_distanceToTargetPosition = "\ndistanceToTargetPosition = ",
-        str_notApplicable = "n/a",
         // level
         str_levelTitle = "<u>Level;</u>\ninLevel = ",
         str_assetKey = "\nassetKey = ",
@@ -136,6 +121,7 @@ public class uiDebug : MonoBehaviour
         uiDebugGroup.SetActive(debugMode);
         if (debugMode) { Controls(); }
         if (noclipEnabled) { Noclip(); }
+        Player.instance.moveActive = !noclipEnabled;
     }
     void GetRes() // gets the current resolution, refresh rate and aspect ratio
     {
@@ -153,14 +139,12 @@ public class uiDebug : MonoBehaviour
         if (!debugMode)
         {
             uiStatsPlayer.text = string.Empty;
-            //uiStatsGrapple.text = string.Empty;
             //uiStatsLevel.text = string.Empty;
             //uiStatsStealth.text = string.Empty;
             uiStatsMiscellaneous.text = string.Empty;
             return;
         }
         uiStatsPlayer.text = Player.instance.debugGetStats().ToString();
-        //uiStatsGrapple.text = Grapple.instance.debugGetStats().ToString();
         //uiStatsLevel.text = new StringBuilder(str_levelTitle).Append(LevelLoader.instance.inLevel).Append(LevelLoader.instance.levelCurrent != null ? LevelLoader.instance.levelCurrent.debugGetStats().ToString() : string.Empty).ToString();
         //uiStatsStealth.text = StealthHandler.instance.debugGetStats().ToString();
         uiStatsMiscellaneous.text = new StringBuilder("<u>Miscellaneous;</u>")
@@ -200,11 +184,10 @@ public class uiDebug : MonoBehaviour
         }
         uiNotes.text = notesText.Append(todosText).ToString();
     }
-    void Controls() // allows for WASD movement control and scroll to change the grapple distance
+    void Controls()
     {
         // scroll to change hook distance
-        //float scrollY = Input.mouseScrollDelta.y;
-        //if (scrollY != 0) { Grapple.instance.debugMaxDistanceEdit(scrollY); }
+        Camera.main.fieldOfView -= Input.mouseScrollDelta.y;
 
         // enables debug notes on screen
         if (Input.GetKeyDown(KeyCode.Insert)) { showNotes = !showNotes; }
@@ -219,7 +202,7 @@ public class uiDebug : MonoBehaviour
     {
         // wasd movement
         if (uiDebugConsole.instance.gameObject.activeSelf) { return; }
-        Player.instance.transform.position += noclipSpeed * Time.deltaTime * Player.instance.transform.TransformDirection(new(Extensions.FloatFromAxis(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A)), 0, Extensions.FloatFromAxis(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S))));
+        Player.instance.transform.position += noclipSpeed * Time.deltaTime * Player.instance.playerTransformReadOnly.TransformDirection(new(Extensions.FloatFromAxis(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A)), 0, Extensions.FloatFromAxis(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S))));
     }
     public void ToggleNoclip()
     {
