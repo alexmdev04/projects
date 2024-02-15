@@ -7,15 +7,15 @@ public class ArrayExercise : MonoBehaviour
 
     void Start()
     {
-        numbers[0] = 10
-        numbers[1] = 20
-        numbers[2] = 30
-        numbers[3] = 40
-        numbers[4] = 50
+        numbers[0] = 10;
+        numbers[1] = 20;
+        numbers[2] = 30;
+        numbers[3] = 40;
+        numbers[4] = 50;
 
-        for(int i = 0; i < numbers.Length; i++) { Debug.Log(numbers[i]); }
+        for (int i = 0; i < numbers.Length; i++) { Debug.Log(numbers[i]); }
 
-        Debug.Log("The arrays are " + numbers.SequenceEqual(otherNumbers) ? "equal" : "not equal");
+        Debug.Log("The arrays are " + (numbers.SequenceEqual(otherNumbers) ? "equal" : "not equal"));
     }
 }
 public class ListExercise : MonoBehaviour
@@ -43,7 +43,7 @@ public class HashSetExercise : MonoBehaviour
         words.Add("banana");
         words.Add("orange");
 
-        if (words.Contains("banana")) { Debug.Log("Found banana!") }
+        if (words.Contains("banana")) { Debug.Log("Found banana!"); }
 
         foreach (string word in words)
         {
@@ -78,7 +78,7 @@ public class QueueExercise : MonoBehaviour
         actions.Enqueue("Shoot");
         actions.Enqueue("Dodge");
 
-        while (actions.Count > 0) 
+        while (actions.Count > 0)
         {
             string action = actions.Dequeue();
             Debug.Log("Performing action: " + action);
@@ -107,7 +107,7 @@ public class TestYourLimits : MonoBehaviour
     List<int> numbers1 = new() { 8, 10, 54, 70 };
     List<int> numbers2 = new() { 15, 2, 30, 1 };
     List<int> numbers3 = new();
-    
+
     void Start()
     {
         numbers3.Clear();
@@ -141,9 +141,9 @@ public class Overkill : MonoBehaviour
     {
         for (int i = 0; numbers1.Count == numbers2.Count && i < numbers1.Count; i++)
         {
-            if (functions.TryGetValue(i, out Func<int, int, int> function)) 
-            { 
-                numbers3.Add(function(numbers1[i], numbers2[i])); 
+            if (functions.TryGetValue(i, out Func<int, int, int> function))
+            {
+                numbers3.Add(function(numbers1[i], numbers2[i]));
             }
         }
     }
